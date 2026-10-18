@@ -1,0 +1,15 @@
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: "*.{ts,tsx,js,jsx,json,jsonc}"
+      run: pnpm exec biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+    deps:
+      glob: "src/**/*.{ts,tsx}"
+      run: pnpm exec depcruise --config .dependency-cruiser.cjs {staged_files}
+
+pre-push:
+  commands:
+    check:
+      run: pnpm check

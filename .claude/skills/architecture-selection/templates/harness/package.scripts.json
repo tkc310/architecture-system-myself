@@ -1,0 +1,22 @@
+{
+  "//": "package.json の scripts と devDependencies に統合する。版は導入時に最新を入れる(pnpm add -D <name>)。",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "lint:deps": "depcruise src --config .dependency-cruiser.cjs",
+    "lint:unused": "knip",
+    "test": "vitest run --passWithNoTests",
+    "test:e2e": "playwright test",
+    "check": "pnpm typecheck && pnpm lint && pnpm lint:deps && pnpm lint:unused && pnpm test"
+  },
+  "devDependencies": [
+    "typescript",
+    "@biomejs/biome",
+    "dependency-cruiser",
+    "knip",
+    "vitest",
+    "@playwright/test",
+    "lefthook"
+  ]
+}

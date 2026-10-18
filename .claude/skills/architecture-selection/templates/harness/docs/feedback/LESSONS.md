@@ -7,9 +7,9 @@
 2. **回数が 2 になったら昇格を検討する**。優先順位:
    1. 型(ブランド型、スキーマ、判別共用体で不正な状態を表せなくする)
    2. 依存ルール(`.dependency-cruiser.cjs`)
-   3. lint ルール(`biome.json`)
+   3. lint ルール(`.oxlintrc.json`)
    4. テスト(失敗を再現するテストを追加)
-   5. フック(`.claude/settings.json`、`lefthook.yml`)
+   5. フック(`.claude/settings.json`、`.cursor/hooks.json`、`lefthook.yml`)
    6. どれも無理なときだけ `AGENTS.md` に文章で追記
 3. 昇格したら「昇格先」に仕組みとファイルを書き、状態を「昇格済み」にする。
 4. 構成そのものの問題(層が足りない/多すぎる)が原因なら、ADR の見直しを提案する。

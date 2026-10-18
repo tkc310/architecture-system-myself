@@ -1,21 +1,30 @@
 {
-  "//": "package.json の scripts と devDependencies に統合する。版は導入時に最新を入れる(pnpm add -D <name>)。",
+  "//": "package.json の scripts と devDependencies に統合し、このファイルは置かない。版は導入時に公式の情報で確かめ、oxfmt は exact で固定する(pnpm add -D -E oxfmt)。",
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "lint": "biome check .",
-    "format": "biome check --write .",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint",
     "lint:deps": "depcruise src --config .dependency-cruiser.cjs",
-    "lint:unused": "knip",
-    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "check": "pnpm typecheck && pnpm lint && pnpm lint:deps && pnpm lint:unused && pnpm test"
+    "generate": "echo \"生成コマンド(openapi-typescript、drizzle-kit など)をここに書く\"",
+    "generate:check": "pnpm generate && git diff --exit-code -- src/generated",
+    "build": "echo \"ビルドコマンドをここに書く\"",
+    "check": "pnpm format:check && pnpm lint && pnpm lint:deps && pnpm typecheck && pnpm test"
   },
   "devDependencies": [
     "typescript",
-    "@biomejs/biome",
+    "oxlint",
+    "oxlint-tsgolint",
+    "oxfmt",
     "dependency-cruiser",
-    "knip",
     "vitest",
+    "@vitest/coverage-v8",
+    "@testing-library/react",
+    "happy-dom",
     "@playwright/test",
     "lefthook"
   ]

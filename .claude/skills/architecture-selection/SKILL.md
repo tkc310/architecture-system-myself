@@ -1,70 +1,68 @@
 ---
 name: architecture-selection
-description: 新規プロジェクトや大きな改修で、要件と規模からアーキテクチャと技術スタックを選定し、ディレクトリ構成・ハーネス雛形・ADRまで出力する。フルスタックTypeScriptを既定とし、性能要件があるときだけ Effect / Worker / WebAssembly / Go の順に段階的に検討する。Use when choosing architecture, tech stack, project structure, or scaffolding a new codebase for AI-driven development.
+description: 新規サービスのアーキテクチャと技術スタックを選定し、ARCHITECTURE.md・ディレクトリ構成・ハーネス雛形(型/lint/依存ルール/テスト/フック)・ADRを出力する。既存の ARCHITECTURE.md の調整や、コードベースの構造レビューにも使う。フルスタックTypeScriptを既定とし、構造を規模でS/M/Lの3段階から選び、性能要件があるときだけ Effect / Worker / WebAssembly / Go の順に検討する。Use when choosing architecture or tech stack, scaffolding a codebase for AI-driven development, or reviewing a codebase's structure.
 ---
 
 # アーキテクチャ選定スキル
 
-要件を聞き取り、**要件を満たす中で最も単純なアーキテクチャ**を選び、次の5つを出力する。
+要件を聞き取り、**要件を満たす中で最も単純な構造**を選び、境界を機械で守る雛形まで出力する。ルールの本文は `references/` にある。最初に `references/README.md` を読み、作業に要る文書だけを読む。
 
-| # | 出力 | 置き場所(対象プロジェクト内) | テンプレート |
-|---|------|------------------------------|--------------|
-| 1 | 技術スタック | `docs/architecture/overview.md` の「技術スタック」節 | `templates/architecture-overview.md` |
-| 2 | アーキテクチャ | 同「アーキテクチャ」節 | 同上 |
-| 3 | ディレクトリ構成 | 同「ディレクトリ構成」節+実ディレクトリ | `references/directory-structures.md` |
-| 4 | ハーネスの雛形 | リポジトリ直下の設定ファイル群 | `templates/harness/` |
-| 5 | ADR | `docs/adr/NNNN-*.md` | `templates/adr.md` |
+## 出力
 
-## 基本原則
+| 出力 | 置き場所（対象リポジトリ） | 雛形 |
+| --- | --- | --- |
+| 技術スタック、アーキテクチャ、ディレクトリ構成の要約 | `ARCHITECTURE.md` | `templates/ARCHITECTURE.md` |
+| 決定とその理由 | `docs/adr/NNNN-<title>.md` | `templates/adr.md` |
+| ディレクトリ構成 | 実ディレクトリ（空のものは `.gitkeep`）と各モジュールの `README.md`・`AGENTS.md` | `references/principles.md`、`templates/module-AGENTS.md` |
+| ハーネス | リポジトリ直下の設定ファイル群 | `templates/harness/` |
 
-1. **単純さが既定**:層(ドメイン、リポジトリ、ポート等)は「必要になった証拠」があるときだけ足す。シンプルな CRUD にドメイン層やリポジトリ層を作らない。
-2. **TypeScript ファースト**:性能対策はまず TS エコシステム内で行う(`references/performance-ladder.md`)。Go は最後の手段で、境界の明確な一部分にだけ使う。
-3. **境界は機械で守る**:ルールは文章より、型・lint・依存ルール・テスト・フックで強制する。文章(CLAUDE.md)には機械化できないものだけを書く。
-4. **昇格条件を先に書く**:選んだ構成をいつ一段上げるべきかを ADR に書いておき、後から判断できるようにする。
-5. **記憶で版を決めない**:ライブラリの最新版・推奨設定は選定時に公式ドキュメントで確認する。
+ARCHITECTURE.md には採った値と外した理由だけを書き、ルールの本文は書き写さない。決定の経緯は ADR に書き、ARCHITECTURE.md からリンクする。
 
-## 手順
+## ルールの優先順位
 
-### 1. 現状把握
-- 対象リポジトリに `README`、`docs/architecture/`、`docs/adr/`、`package.json`、`go.mod` があれば先に読む。既存の決定(ADR)は覆さず、変更なら新しい ADR で上書きする。
+承認とセキュリティのルール、編集制約、品質ゲート、それ以外の文書の順で採る。各ルールの「必須」は原則として採り、外すときは理由を ARCHITECTURE.md と ADR に書く。
 
-### 2. 聞き取り
-- `references/intake.md` の質問票を使う。**一度に聞くのは最大5問**。既に答えが分かる項目は聞かない。
-- 回答がなく作業を止められないときは、質問票の「既定値」を採用し、ADR の「前提」に明記する。
+## 作業モード
 
-### 3. アーキタイプの決定
-- `references/archetypes.md` の判定フローで L1 / L2 / L3 のどれかを選ぶ。
-- 迷ったら**下の段(より単純な方)**を選び、昇格条件を ADR に書く。
+### モード 1: 新規作成
 
-### 4. 修飾子(モディファイア)の付与
-- 性能要件がある → `references/performance-ladder.md` で必要な段(P0〜P4)を決める。
-- リアルタイム、バックグラウンドジョブ、マルチテナント等 → `references/archetypes.md` の「修飾子」節を適用する。
+1. **ヒアリング**（`references/hearing.md`）。リポジトリから分かることを先に調べ、推測できない項目だけを一度にまとめて質問する。回答を要約して確認してから先に進む。
+2. **構造の段階**（`references/scale-selection.md`）。S / M / L を判定する。境界上でどちらも同程度に妥当なときは、ユーザーに確認する。
+3. **技術スタック**（`references/tech-selection.md`）。既定から外れる項目を決める。採用するライブラリは、公式ドキュメントで現行のリリースと導入手順を確認してから書く。記憶で版や設定を書かない。
+4. **性能**（`references/performance-ladder.md`）。性能の要件があるときだけ、必要な段階を決める。段階 4（WebAssembly）と 5（Go）は、ユーザーに確認してから採る。
+5. **構造と CQS**（`references/principles.md`、`references/cqs.md`）。採った段階のディレクトリを作り、モジュール（S では feature）の一覧と所有するテーブルを決める。
+6. **ハーネス**（`references/quality-gates.md`、`references/testing-strategy.md`、`references/editing-constraints.md`）。`templates/harness/README.md` の手順で雛形を置く。
+7. **ADR と ARCHITECTURE.md**。ADR は最低限、次の 2 本を書く。段階 3 以上の性能対策、Go の採用、既定のスタックからの逸脱は、それぞれ別の ADR にする。
+   - `0001-structure-tier.md`（構造の段階と、昇格・降格の条件）
+   - `0002-tech-stack.md`（技術スタックと、既定から外した理由）
+8. **検証**。依存を入れたら `pnpm check` を実行し、空の雛形で通ることを確かめる。境界違反のファイルを一時的に置き、`pnpm lint:deps` が失敗することも確かめてから消す。最後に `references/review-checklist.md` で点検する。
 
-### 5. 技術スタックの決定
-- `references/tech-stack.md` の既定から選び、外すときは理由を ADR に書く。
-- 採用するライブラリは公式サイトで現行の版と導入手順を確認してから書く。
+### モード 2: 既存の ARCHITECTURE.md を調整する
 
-### 6. 出力の生成
-1. `docs/architecture/overview.md` を `templates/architecture-overview.md` から作る。
-2. ディレクトリを `references/directory-structures.md` に沿って作る(空ディレクトリには `.gitkeep`)。
-3. `templates/harness/` から雛形をコピーする(`.claude/`、`.github/` などのドット付きディレクトリも含む)。
-   - アーキタイプに合う依存ルール `dependency-cruiser/<archetype>.cjs` を `.dependency-cruiser.cjs` として置き、`dependency-cruiser/` ディレクトリ自体はコピーしない。
-   - `package.scripts.json` の内容は `package.json` に統合し、ファイル自体は置かない。
-   - `scripts/hooks/post-edit.sh` に実行権限を付ける(`chmod +x`)。フックは `jq` を使う。
-4. ADR を書く:最低限 `0001-architecture-and-stack.md`。性能段 P2 以上、Go 採用、既定スタックからの逸脱は**それぞれ別の ADR** にする。
+1. ヒアリングの回答のうち、変わった前提を確認する。
+2. 変わった前提に関係する文書だけを読み直す。段階を変えるときは `references/scale-selection.md` の昇格・降格の目安を確かめる。
+3. 新しい ADR を書き（古い ADR は「置換」にする）、ARCHITECTURE.md の該当する節と変更履歴を更新する。依存ルールなどのハーネスも合わせて変える。
 
-### 7. 検証
-- 雛形を置いたら `pnpm install` 後に `pnpm check`(typecheck・lint・依存ルール・テスト)を実行し、空の状態で通ることを確認する。
-- `references/review-checklist.md` で出力を自己点検する。
+### モード 3: 既存のコードベースを評価・レビューする
 
-### 8. フィードバックの仕組みを有効化
-- `templates/harness/docs/feedback/LESSONS.md` を配置し、運用ルール(同じ指摘が2回出たら機械的ルールへ昇格)を CLAUDE.md に書く。
-- このスキル自体の改善点は、このスキルの `FEEDBACK.md` に追記する。
+1. 依存ルールの違反、公開 API を通らない import、行数上限を超えるファイルを、ツール（dependency-cruiser、oxlint）で洗い出す。ハーネスがなければ、雛形の設定を一時的に当てて調べる。
+2. CQS の必須を満たさない箇所を挙げる。L では、クエリが書き込みポートを受け取っていないかと、コマンドがドメインデータを返していないかを見る。S と M では、Command と Query を混ぜていないかと、command を他のモジュールから呼んでいないかを見る。
+3. 現在の構造が、実態（開発人数、業務領域の数、ルールの複雑さ）に対して重すぎないか、軽すぎないかを `references/scale-selection.md` で判定する。
+4. CI に品質ゲートの必須ステージがそろっているか、保護パスが二層以上で守られているかを確認する。
+5. 指摘は、必須の違反、外した理由が書かれていない項目、推奨からの提案の順に並べる。
 
 ## 質問すべき場面
 
-次の場合は推測せずユーザーに聞く:
-- L1/L2 または L2/L3 の境界上にあり、どちらも同程度に妥当なとき
-- 性能段 P3(WebAssembly)以上、または Go の採用が候補になったとき
-- 既存 ADR と矛盾する選択になるとき
-- デプロイ先・データストアが既存の契約や組織標準で決まっている可能性があるとき
+次の場合は推測せず、ユーザーに確認する。
+- 構造の段階が境界上にあり、どちらも同程度に妥当なとき
+- 性能対策の段階 4（WebAssembly）以上が候補になったとき
+- 既存の ADR と矛盾する選択になるとき
+- Oxc エコシステムのうち oxlint と oxfmt 以外のツール（Rolldown など）を採るかどうか
+- 保護パスの編集や、承認が要る操作（`references/editing-constraints.md`）
+
+ヒアリングに回答がない項目は、既定のスタックで進め、仮定として ARCHITECTURE.md の「前提条件」に書く。仮定を見直す条件も添える。
+
+## フィードバック
+
+- 対象リポジトリでの指摘は、`docs/feedback/LESSONS.md` に記録し、同じ指摘が 2 回出たら機械的なルール（型、依存ルール、lint、テスト、フック）に昇格させる。
+- このスキル自体のルールに、ギャップ、曖昧なルール、合わなかったルール、繰り返される例外が見つかったら、ユーザーに伝え、`FEEDBACK.md` に記録し、このスキルの正本リポジトリ（`tkc310/architecture-system-myself`）への具体的な編集案を示す。編集は、ユーザーの承認を得てから PR で行う。サービス固有の例外は、共有のルールではなく、そのサービスの ARCHITECTURE.md に書く。

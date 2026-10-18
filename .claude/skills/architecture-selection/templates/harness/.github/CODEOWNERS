@@ -1,0 +1,13 @@
+# 保護パスの担当者(references/editing-constraints.md)。
+# ブランチ保護で「コードオーナーのレビューを必須にする」を有効にしないと、マージは止まらない。
+/db/migrations/          @[org/backend-leads]
+/src/shared/auth/        @[org/security]
+/.github/                @[org/platform]
+/.cursor/                @[org/platform]
+/.claude/                @[org/platform]
+/scripts/guard-paths.sh  @[org/platform]
+/.dependency-cruiser.cjs @[org/platform]
+/.oxlintrc.json          @[org/platform]
+/AGENTS.md               @[org/platform]
+/package.json            @[org/platform]
+/pnpm-lock.yaml          @[org/platform]

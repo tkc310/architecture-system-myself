@@ -47,8 +47,10 @@ if [ -n "$delim" ]; then
   fi
 fi
 
-has() { printf '%s' "$scan" | grep -Eq -- "$1"; }
-has_i() { printf '%s' "$scan" | grep -Eiq -- "$1"; }
+# 拒否の規則は、引用符を取り除いた文字列にも当てる('-XPUT' や '.env' のように引用符で包んでも、bash は引用符を外して実行するため)
+scan_dq=$(printf '%s' "$scan" | tr -d "'\"\\\\")
+has() { printf '%s\n%s' "$scan" "$scan_dq" | grep -Eq -- "$1"; }
+has_i() { printf '%s\n%s' "$scan" "$scan_dq" | grep -Eiq -- "$1"; }
 
 # ---- 拒否: 取り消せない、または検査を回避する操作 ----
 has '(^|[;&|[:space:](])rm[[:space:]](.*[[:space:]])?(-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)([[:space:]]|$)' \
@@ -73,7 +75,7 @@ has '(curl|wget)[^|]*\|[[:space:]]*(sudo[[:space:]]+)?(ba|z)?sh' \
   && deny "ダウンロードしたスクリプトの実行" "スクリプトを保存して内容を人に確認してもらう"
 has_i 'curl.*([[:space:]](-X|--request)[=[:space:]]*(POST|PUT|PATCH|DELETE)|[[:space:]](-d|--data[a-z-]*|-F|--form|-T|--upload-file|--json)([=[:space:]]|[^[:space:]]))' \
   && deny "外部への送信" "送信は人の承認を得てから行う"
-if printf '%s' "$scan" | sed -E 's/\.env\.example//g' | grep -Eq '(^|[^[:alnum:]_])\.env([.[:space:]]|$)|id_rsa|\.pem([[:space:]]|$)|\.key([[:space:]]|$)'; then
+if printf '%s\n%s' "$scan" "$scan_dq" | sed -E 's/\.env\.example//g' | grep -Eq '(^|[^[:alnum:]_])\.env([.[:space:]]|$)|id_rsa|\.pem([[:space:]]|$)|\.key([[:space:]]|$)'; then
   deny "秘密情報のファイルへのアクセス" "必要な値の名前だけを人に確認する"
 fi
 has '(kubectl|helm)[[:space:]]+(apply|delete|upgrade|install)|terraform[[:space:]]+(apply|destroy)|(vercel|netlify|flyctl|fly|wrangler)[[:space:]].*(deploy|--prod)' \
@@ -108,8 +110,12 @@ if [ -n "${FACTORY_JOB:-}" ]; then
     c="${scan:i:1}"
     case "$state" in
       n) case "$c" in
-           "'") state=s ;;
-           '"') state=d ;;
+           "'"|'"')
+             # 単語の先頭で引用符が開き、中身が - で始まるもの('-XPUT' など)は、オプションを隠せるので拒否する
+             if { [ -z "$unq" ] || [ "${unq: -1}" = " " ]; } && [ "${scan:i+1:1}" = "-" ]; then
+               deny "引用符で包んだオプション" "オプションは引用符で包まずに書く"
+             fi
+             [ "$c" = "'" ] && state=s || state=d ;;
            *) unq+="$c" ;;
          esac ;;
       s) [ "$c" = "'" ] && { state=n; unq+="Q"; } ;;
@@ -123,9 +129,13 @@ if [ -n "${FACTORY_JOB:-}" ]; then
   [ "$dq_bad" = 0 ] || deny "二重引用符の中の \$ \` \\" "値は単一引用符で渡す"
   [ "$heredoc" = 1 ] && unq=$(printf '%s' "$unq" | sed -E 's/[[:space:]]*<<-?[[:space:]]*Q[[:space:]]*$//')
   if [[ "$unq" == *$'\n'* ]] || printf '%s' "$unq" | grep -q '[][;&|<>(){}$`\\*?~]'; then
-    deny "無人のジョブでの複数のコマンド、リダイレクト、展開、ワイルドカード" "コマンドは 1 回に 1 つずつ実行し、ファイルの編集は Edit / Write ツールで行う"
+    deny "無人のジョブでの複数のコマンド、リダイレクト、展開、ワイルドカード、引用符で囲まれていない記号" "コマンドは 1 回に 1 つずつ実行する。引数の中の { } ? & などの記号は単一引用符で囲む。ファイルの編集は Edit / Write ツールで行う"
   fi
   unq=$(printf '%s' "$unq" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//; s/[[:space:]]+/ /g')
+  # - で始まる単語の途中に引用符があるもの(-'-output=x' や --o'utput' など)も、オプションを隠せるので拒否する
+  if printf '%s' "$unq" | grep -Eq -- '(^| )-[^ ]*Q'; then
+    deny "引用符を含むオプション" "オプションは引用符を使わずに書く"
+  fi
 
   # コードの実行やファイルの書き込みにつながるオプションは、どのコマンドでも拒否する。
   # ただし、許可リストにある決まった形(git switch -c、git commit -F -)の中の同じ文字は除いてから調べる

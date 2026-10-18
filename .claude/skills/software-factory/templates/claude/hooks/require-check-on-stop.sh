@@ -8,7 +8,7 @@ root="${CLAUDE_PROJECT_DIR:-$PWD}"
 cd "$root" || exit 0
 
 # コードの変更がなければ何もしない
-changed=$(git status --porcelain 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|mts|cts|json)$' || true)
+changed=$(git status --porcelain --untracked-files=all 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|mts|cts|json)$' || true)
 [ -z "$changed" ] && exit 0
 
 session=$(printf '%s' "$input" | jq -r '.session_id // "unknown"' 2>/dev/null)

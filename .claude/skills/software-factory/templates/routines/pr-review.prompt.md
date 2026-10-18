@@ -9,9 +9,9 @@
 ## 手順
 
 1. PR の情報を REST API で読みます(GraphQL を使うコマンドは使えないことがあります)。
-   - `gh api repos/{owner}/{repo}/pulls/<番号>`: 説明(`.body`)、比較元(`.base.ref`)、先頭コミット(`.head.sha`)、ブランチ(`.head.ref`)、下書きか(`.draft`)
+   - `gh api 'repos/{owner}/{repo}/pulls/<番号>'`: 説明(`.body`)、比較元(`.base.ref`)、先頭コミット(`.head.sha`)、ブランチ(`.head.ref`)、下書きか(`.draft`)
    - 下書きか、閉じている PR なら、何もせずに終わります。
-2. PR のブランチを取得します: `git fetch origin <.head.ref>` のあと `git checkout --detach FETCH_HEAD`。
+2. PR のブランチを取得します。`git fetch origin <.head.ref>` を実行し、続けて別のコマンドとして `git checkout --detach FETCH_HEAD` を実行します。
 3. PR の説明の「仕様」に書かれた `docs/specs/` のファイルを仕様とします。なければ、PR の説明と、そこに書かれた Issue を仕様の代わりにします。
 4. 差分は `git diff origin/<.base.ref>...HEAD` で取ります(必要なら先に `git fetch origin <.base.ref>`)。
 5. reviewer.md の観点でレビューし、reviewer.md の出力形式で結果を書きます。
@@ -22,6 +22,14 @@
    (本文)
    EOF
    ```
+
+## コマンドの使い方
+
+このジョブでは、フックが決まった形のコマンドだけを通します。
+
+- 1 回に 1 つのコマンドだけを実行します。`&&`、`|`、`;`、リダイレクト、`$( )` は使えません。
+- 引数の中の `{`、`}`、`?` などの記号は、単一引用符で囲みます(例: `gh api 'repos/{owner}/{repo}/pulls/12' --jq '.head.sha'`)。
+- 拒否されたら、手順にある形に直して実行し直します。手順にない方法を試しません。
 
 ## してはいけないこと
 

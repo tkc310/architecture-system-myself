@@ -7,6 +7,12 @@ set -uo pipefail
 root=$(git rev-parse --show-toplevel)
 cd "$root" || exit 0
 
+# エージェント自身が push したとき(Claude Code のセッションの中)は、入れ子のセッションを起こさない
+if [ -n "${CLAUDECODE:-}" ]; then
+  echo "[factory] Claude Code のセッションの中からの push なので、手元のレビューを省きます。/review で受けてください(PR ではルーティンがレビューします)。" >&2
+  exit 0
+fi
+
 if ! command -v claude >/dev/null 2>&1; then
   echo "[factory] claude が見つからないため、手元のレビューを省きます(PR ではルーティンがレビューします)。" >&2
   exit 0

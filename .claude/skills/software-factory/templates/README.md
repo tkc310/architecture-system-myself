@@ -39,7 +39,7 @@ architecture-selection のハーネスを置いた後に置く。形式(A: GitHu
 2. 形式 A: GitHub のシークレットに `ANTHROPIC_API_KEY` を登録する。形式 B: `routines/README.md` の手順でクラウド環境とルーティンを作る。
 3. 必要なら `GITLEAKS_LICENSE` を登録する。
 4. ブランチ保護(ルールセット)を設定する。
-   - 必須チェック: 品質ゲートの 6 ステージ、`secrets-scan`、`factory/review`
+   - 必須チェック: 品質ゲートの 6 ステージ、`secrets-scan`、`factory/review`。形式 A では `factory/review` の発行元を GitHub Actions に固定する
    - コードオーナーのレビューを必須にする
    - `main` への直接の push と強制 push を禁止する
    - 迂回を許すリスト(Bypass list)を空にする(管理者も迂回できないようにする)

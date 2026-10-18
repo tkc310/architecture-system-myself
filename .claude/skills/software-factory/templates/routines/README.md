@@ -16,7 +16,7 @@
    - `factory-review`: `FACTORY_JOB=review`
    - `factory-improve`: `FACTORY_JOB=improve`、セットアップスクリプトに `pnpm install --frozen-lockfile`
    - ネットワークは既定の Trusted のままにする。秘密情報は環境変数に入れない。
-   - `FACTORY_JOB` があると、フックが専用スクリプト(`scripts/factory/post-review.sh` と `open-draft-pr.sh`)の実行と、規則ファイルの編集をジョブごとに許す。エージェントが会話の中で設定しても、フックには届かない。
+   - `FACTORY_JOB` があると、フックがジョブごとの許可リストに切り替わり、専用スクリプト(`scripts/factory/post-review.sh`、`open-draft-pr.sh`、`open-issue.sh`)の実行と、改善ジョブによる規則ファイルの編集を許す。許可リストにないコマンド、リダイレクトによる書き込み、コマンド置換は拒否される。エージェントが会話の中で設定しても、フックには届かない。
 3. **レビューを動かす PR を絞る。** GitHub トリガーのフィルタで、次を両方指定する。
    - Author が「次のどれか」: 信頼できる開発者の GitHub ユーザー名
    - Is draft が `false`
@@ -24,6 +24,7 @@
 4. **ブランチ保護で、管理者も迂回できないようにする。** ルーティンはあなたのアカウントとして push するので、あなたが迂回できる規則はルーティンも迂回できる。ルールセットで次を設定し、迂回を許すリスト(Bypass list)を空にする。
    - `main` への直接の push と強制 push の禁止
    - 必須チェック: 品質ゲートの 6 ステージ、`secrets-scan`、`factory/review`
+   - 注意: 形式 B の `factory/review` はあなたのアカウントで付くので、発行元を固定できない。書き込み権限のある人が手で付けた `success` も通る。コードオーナーのレビューを必須にして補う
 
 ## 作り方(Web)
 

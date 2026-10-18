@@ -2,7 +2,9 @@
 
 週次の改善ジョブ(形式 A: GitHub Actions の `factory-improve.yml`、形式 B: ルーティンの factory-improve)が、この手順で動く。人が手元で同じことをするときも、この手順に従う。
 
-GitHub の情報は REST API(`gh api repos/{owner}/{repo}/...`)だけで読む。ルーティンの環境では GraphQL を使うコマンド(`gh pr list`、`gh pr view` など)が使えないことがある。`gh api` での書き込みはフックが拒否するので、書き込みは決められたスクリプトとコマンドだけで行う。
+GitHub の情報は REST API(`gh api 'repos/{owner}/{repo}/...'`)だけで読む。ルーティンの環境では GraphQL を使うコマンド(`gh pr list`、`gh pr view` など)が使えないことがある。`gh api` での書き込みはフックが拒否するので、書き込みは決められたスクリプトとコマンドだけで行う。
+
+無人のジョブでは、フックが決まった形のコマンドだけを通す。1 回に 1 つのコマンドだけを実行し(`&&`、`|`、`;`、リダイレクト、`$( )` は使えない)、引数の中の `{`、`}`、`?`、`&` などの記号は単一引用符で囲む。ファイルの編集は Edit / Write ツールで行う。
 
 ## 守ること
 
@@ -17,10 +19,10 @@ GitHub の情報は REST API(`gh api repos/{owner}/{repo}/...`)だけで読む�
 ### 1. 集める
 
 - `docs/feedback/LESSONS.md`: 回数が 2 以上で、状態が「記録のみ」の行。対象期間に追記・更新された行。
-- CI の失敗: `gh api "repos/{owner}/{repo}/actions/runs?status=failure&created=>=<7 日前の日付>&per_page=100"` で失敗した実行を一覧し、各実行の失敗したジョブを `gh api repos/{owner}/{repo}/actions/runs/<id>/jobs` で調べる(ログが要るときは `gh run view <id> --log-failed`)。どのステップ(フォーマット、lint、依存ルール、型、テスト、生成コード、ビルド)で、どの規則で落ちたかを数える。
+- CI の失敗: `gh api "repos/{owner}/{repo}/actions/runs?status=failure&created=<7 日前の日付>..<今日の日付>&per_page=100"`(日付は YYYY-MM-DD) で失敗した実行を一覧し、各実行の失敗したジョブを `gh api 'repos/{owner}/{repo}/actions/runs/<id>/jobs'` で調べる(ログが要るときは `gh run view <id> --log-failed`)。どのステップ(フォーマット、lint、依存ルール、型、テスト、生成コード、ビルド)で、どの規則で落ちたかを数える。
 - レビューの指摘: `gh api "repos/{owner}/{repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100"` のうち、対象期間に `merged_at` がある PR について、次のうち「必須」とされたもの。
-  - エージェントのレビュー: `gh api repos/{owner}/{repo}/issues/<番号>/comments` のうち、`<!-- factory-review` で始まるコメント
-  - 人のレビュー: `gh api repos/{owner}/{repo}/pulls/<番号>/comments` と `gh api repos/{owner}/{repo}/pulls/<番号>/reviews`
+  - エージェントのレビュー: `gh api 'repos/{owner}/{repo}/issues/<番号>/comments'` のうち、`<!-- factory-review` で始まるコメント
+  - 人のレビュー: `gh api 'repos/{owner}/{repo}/pulls/<番号>/comments'` と `gh api 'repos/{owner}/{repo}/pulls/<番号>/reviews'`
 
 ### 2. 候補を選ぶ
 

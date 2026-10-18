@@ -4,6 +4,8 @@ name: ci
 
 on:
   pull_request:
+    # ready_for_review: 下書きの PR を人が「Ready for review」にしたときにも動かす
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
 

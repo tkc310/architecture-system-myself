@@ -1,0 +1,17 @@
+# architecture-selection の lefthook.yml に、次のコマンドを統合する。このファイル自体は置かない。
+
+pre-commit:
+  commands:
+    # 両方の形式: 秘密情報の検出。
+    # gitleaks の版によってコマンドが違う。v8.19 以降は `gitleaks git --pre-commit --staged`、
+    # それより前は `gitleaks protect --staged`。導入した版の README で確認すること。
+    secrets:
+      run: gitleaks git --pre-commit --redact --staged --verbose
+
+pre-push:
+  commands:
+    # 形式 B だけ: push の前に手元の Claude Code で独立レビューを行い、必須の指摘があれば push を止める。
+    # --no-verify で飛ばせるが、マージにはルーティンが付ける factory/review が要るので、飛ばしてもマージはできない。
+    # 形式 A では置かない(PR のレビューは GitHub Actions が行う)。
+    agent-review:
+      run: scripts/factory/local-review.sh

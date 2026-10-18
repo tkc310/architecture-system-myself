@@ -26,10 +26,10 @@
 | `db/migrations/**` | 適用済みのマイグレーションを書き換えると、環境ごとにスキーマが食い違う。新規の追加も確認する |
 | `src/shared/auth/**` | 認証・認可の誤りは、そのまま情報漏えいになる |
 | `src/generated/**` | 生成し直すと手の変更が消える。生成元を直す |
-| `infra/**`、`.github/workflows/**`、`Dockerfile` | 本番環境とデプロイの経路を変える |
+| `infra/**`、`.github/**`、`Dockerfile` | 本番環境とデプロイの経路、CI のガードレールを変える |
 | `.env*` | 機密情報を含む |
 | `package.json` の依存、ロックファイル | 依存の追加はライセンスと供給網のリスクを伴う |
-| `.cursor/hooks.json`、`.cursor/rules/**`、`.claude/settings.json`、`scripts/guard-paths.sh`、`.dependency-cruiser.cjs`、`.oxlintrc.json`、`CODEOWNERS`、`AGENTS.md` | ガードレール自体を弱める変更になりうる |
+| `.cursor/**`、`.claude/**`(設定、エージェントの役割、フック、コマンド)、`scripts/guard-paths.sh`、`scripts/check-edited-file.sh`、`lefthook.yml`、`.dependency-cruiser.cjs`、`.oxlintrc.json`、`CODEOWNERS`、`AGENTS.md`、`CLAUDE.md`、`docs/factory/**`、`scripts/factory/**`、`.git/**` | ガードレール自体を弱める変更になりうる。週次の改善ジョブ(GitHub Actions かルーティン)だけは、規則を強める下書き PR のために `.dependency-cruiser.cjs`、`.oxlintrc.json`、`AGENTS.md` を編集できる |
 
 - 保護パスは、指示（Cursor ルール、AGENTS.md）だけで守らない。下の表の、強制する仕組みのうち二つ以上で守る。
   - 理由: 指示はエージェントが読み落とすことがあり、強制にならない。

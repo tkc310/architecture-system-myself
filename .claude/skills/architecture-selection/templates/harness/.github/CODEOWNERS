@@ -6,6 +6,8 @@
 /.cursor/                @[org/platform]
 /.claude/                @[org/platform]
 /scripts/guard-paths.sh  @[org/platform]
+/scripts/factory/        @[org/platform]
+/docs/factory/           @[org/platform]
 /.dependency-cruiser.cjs @[org/platform]
 /.oxlintrc.json          @[org/platform]
 /AGENTS.md               @[org/platform]

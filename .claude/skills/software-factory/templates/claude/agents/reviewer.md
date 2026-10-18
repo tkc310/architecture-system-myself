@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: 仕様と差分だけを読み、実装が仕様どおりかを独立にレビューする。ファイルは書き換えない。/review と CI のレビューから使う。
+description: 仕様と差分だけを読み、実装が仕様どおりかを独立にレビューする。ファイルは書き換えない。/review と、GitHub 側のレビュー(GitHub Actions かルーティン)と、push 前の手元のレビューから使う。
 tools: Read, Grep, Glob, Bash
 ---
 

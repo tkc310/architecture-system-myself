@@ -5,7 +5,7 @@
 | 周期 | 担当 | 入力 | 出力 |
 | --- | --- | --- | --- |
 | PR ごと | `retro` エージェント(`/retro`) | PR、レビューの指摘、その PR の CI の失敗 | 同じ PR に含める `docs/feedback/LESSONS.md` への追記 |
-| 週ごと | CI 上の改善ジョブ(`factory-improve.yml`) | 直近 1 週間の LESSONS.md の追記、CI の失敗、PR のレビューコメント | 規則を昇格させる下書き PR と、週次の報告 |
+| 週ごと | 改善ジョブ(形式 A: `factory-improve.yml`、形式 B: ルーティン `factory-improve`) | 直近 1 週間の LESSONS.md の追記、CI の失敗、PR のレビューコメント | 規則を昇格させる下書き PR と、週次の報告 |
 
 ## PR ごとの振り返り
 
@@ -20,7 +20,7 @@
 
 **必須**
 
-- 週に一度、CI 上で改善ジョブを動かす(`templates/github/workflows/factory-improve.yml`)。手動でも起動できるようにする。
+- 週に一度、改善ジョブを動かす。形式 A は `templates/github/workflows/factory-improve.yml`、形式 B は `templates/routines/weekly-improve.prompt.md` のルーティン。どちらも手動でも起動できる(Actions の workflow_dispatch、ルーティンの Run now)。
 - 改善ジョブは次を集める。
   - LESSONS.md のうち、回数が 2 以上で、状態が「記録のみ」の行
   - 直近 1 週間に失敗した CI のジョブと、失敗したステップ(どの規則で落ちたか)

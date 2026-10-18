@@ -28,8 +28,10 @@ has 'git[[:space:]]+push.*[[:space:]](origin[[:space:]]+)?(main|master)([[:space
   && deny "main への直接プッシュ" "ブランチを作って PR にする"
 has 'git[[:space:]]+(reset[[:space:]]+--hard|clean[[:space:]]+-[a-zA-Z]*f|checkout[[:space:]]+--[[:space:]]+\.)' \
   && deny "作業内容を捨てる操作" "git stash か、変更を個別に戻す"
-has '--no-verify|--no-gpg-sign|HUSKY=0|LEFTHOOK=0' \
+has '--no-verify|--no-gpg-sign|HUSKY=0|LEFTHOOK=0|LEFTHOOK_EXCLUDE=|SKIP_HOOKS' \
   && deny "Git のフックや署名の回避" "フックが指摘した問題を直す"
+has 'core\.hooksPath|lefthook[[:space:]]+(uninstall|remove)|\.git/hooks|git[[:space:]]+commit[[:space:]](.*[[:space:]])?-[a-zA-Z]*n[a-zA-Z]*([[:space:]]|$)' \
+  && deny "Git のフックの無効化や書き換え" "フックが指摘した問題を直す。フックの設定は人が変える"
 has 'gh[[:space:]]+pr[[:space:]]+merge|gh[[:space:]]+api.*-X[[:space:]]*(PUT|DELETE).*merge' \
   && deny "PR のマージ" "マージは人が行う"
 has 'gh[[:space:]]+api.*([[:space:]](-X|--method)[[:space:]]*(POST|PUT|PATCH|DELETE)|[[:space:]](-f|-F|--field|--raw-field|--input)[[:space:]])' \
@@ -44,6 +46,16 @@ fi
 has '(kubectl|helm)[[:space:]]+(apply|delete|upgrade|install)|terraform[[:space:]]+(apply|destroy)|(vercel|netlify|flyctl|fly|wrangler)[[:space:]].*(deploy|--prod)' \
   && deny "本番や共有環境への操作" "デプロイは CI と人の承認を通す"
 
+# 工場の書き込み用スクリプトは、決められた無人ジョブの中でだけ使える。
+# FACTORY_JOB はジョブの実行環境(GitHub Actions のワークフロー、ルーティンのクラウド環境)が設定する値で、
+# エージェントが Bash で設定しても、このフックのプロセスには届かない。
+if has 'scripts/factory/post-review\.sh' && [ "${FACTORY_JOB:-}" != "review" ]; then
+  deny "レビュー結果の投稿" "レビュー結果はレビュー用のジョブだけが投稿する"
+fi
+if has 'scripts/factory/(open-draft-pr|open-issue)\.sh' && [ "${FACTORY_JOB:-}" != "improve" ]; then
+  deny "改善ジョブ用の PR 作成" "手元では /build の手順で PR を作る"
+fi
+
 # main ブランチ上でのコミット
 if has 'git[[:space:]]+commit'; then
   branch=$(git -C "${CLAUDE_PROJECT_DIR:-.}" symbolic-ref --short HEAD 2>/dev/null || echo "")
@@ -52,8 +64,9 @@ if has 'git[[:space:]]+commit'; then
   esac
 fi
 
-# CI では確認を出しても応える人がいない。CI のエージェントは --allowedTools で絞っているので、確認は省く。
-if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+# 無人のジョブ(GitHub Actions、ルーティン)では確認を出しても応える人がいない。
+# 無人のジョブは、使えるツールと書き込み先をジョブの側で絞っているので、確認は省く。拒否は上で効いている。
+if [ "${GITHUB_ACTIONS:-}" = "true" ] || [ -n "${FACTORY_JOB:-}" ]; then
   exit 0
 fi
 

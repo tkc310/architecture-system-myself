@@ -24,7 +24,7 @@ AI 駆動開発で使い回すための設計のボイラープレート。ア�
 | 工程 | 仕様化 → 計画 → 実装 → 検証 → 独立レビュー → 振り返り → マージ。準備完了と完了の定義、仕様の雛形 |
 | 役割 | サブエージェント `planner` / `implementer` / `reviewer` / `retro` と、コマンド `/spec` `/build` `/review` `/retro` |
 | ガードレール | 権限の allow / ask / deny、危険なコマンドの拒否、保護パス、検査を通さない完了の阻止、秘密情報の検出、CODEOWNERS |
-| CI | PR ごとのエージェントのレビュー、週次の改善ジョブ |
+| 無人ジョブ | PR ごとのエージェントのレビューと週次の改善。形式 A: GitHub Actions + API キー、形式 B: lefthook + ルーティン(サブスクリプション)から選ぶ。レビュー結果は必須チェック `factory/review` になり、`--no-verify` で回避してもマージできない |
 | 改善ループ | PR ごとの振り返り(LESSONS.md)と、週次で規則を強める下書き PR。規則を緩める変更は自動では提案しない |
 
 ### 他のプロジェクトで使う
@@ -66,7 +66,9 @@ cp -r .claude/skills/architecture-selection .claude/skills/software-factory ~/.c
 ├── references/                 # stations / roles / guardrails / improvement-loop / audit-checklist
 └── templates/
     ├── claude/                 # agents / skills(/spec /build /review /retro)/ hooks / settings.json
-    ├── github/                 # agent-review / factory-improve / secrets-scan / PR テンプレート
+    ├── github/                 # 形式 A の agent-review / factory-improve、secrets-scan、PR テンプレート
+    ├── routines/               # 形式 B のルーティンのプロンプトと設定手順
+    ├── scripts/factory/        # 無人ジョブ用: レビュー結果の投稿、下書き PR と Issue の作成、push 前の手元のレビュー
     └── docs/                   # factory/README.md, factory/improve.md, specs/TEMPLATE.md
 ```
 

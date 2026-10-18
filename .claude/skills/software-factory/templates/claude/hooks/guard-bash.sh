@@ -138,10 +138,20 @@ if [ -n "${FACTORY_JOB:-}" ]; then
   fi
 
   # コードの実行やファイルの書き込みにつながるオプションは、どのコマンドでも拒否する。
+  # 省略した長いオプション(--outp=x など)はこの正規表現をすり抜けるが、git と gh は省略形を受け付けないので効かない。
+  # 省略形を受け付けるツールを許可リストに足すときは、この前提が崩れないか確かめること。
   # ただし、許可リストにある決まった形(git switch -c、git commit -F -)の中の同じ文字は除いてから調べる
   opts=$(printf '%s' "$unq" | sed -E 's/^git switch -c /git switch /; s/^git commit -F -$/git commit/')
-  if printf '%s' "$opts" | grep -Eq -- '(^| )(--output|--upload-pack|--receive-pack|--exec|--ext-diff|--textconv|--config|--git-dir|--work-tree|-c|-C|-o|--pre|--rawfile|--slurpfile|--input|--method|--field|--raw-field)([= ]|$)|(^| )-[XfF]'; then
+  if printf '%s' "$opts" | grep -Eq -- '(^| )(--output|--upload-pack|--receive-pack|--exec|--ext-diff|--textconv|--no-index|--config|--git-dir|--work-tree|-c|-C|-o|--pre|--rawfile|--slurpfile|--input|--method|--field|--raw-field)([= ]|$)|(^| )-[XfF]'; then
     deny "無人のジョブで使えないオプション" "docs/factory/ の手順にある形でコマンドを使う"
+  fi
+
+  # ファイルを読むコマンドは、リポジトリの中だけ(.git/ とリポジトリの外は読ませない。トークンや秘密情報が置かれうるため)
+  if printf '%s' "$unq" | grep -Eq '^(cat|ls|head|tail|wc|jq|grep)( |$)'; then
+    deq_args=$(printf '%s' "$scan" | tr -d "'\"")
+    if printf '%s' "$deq_args" | grep -Eq '(^|[[:space:]=])(/|\.\.)|(^|[[:space:]=/])\.git(/|[[:space:]]|$)|\.\./'; then
+      deny "リポジトリの外や .git/ の読み取り" "リポジトリの中のファイルだけを読む"
+    fi
   fi
 
   ref='[A-Za-z0-9._/-]+'

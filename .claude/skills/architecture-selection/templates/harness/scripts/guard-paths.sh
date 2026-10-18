@@ -11,12 +11,21 @@ path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // .tool_input.path /
 root="${CLAUDE_PROJECT_DIR:-${CURSOR_PROJECT_DIR:-$PWD}}"
 rel="${path#"$root"/}"
 
+# 週次の改善ジョブ(CI 上、software-factory の factory-improve.yml)だけは、規則を強める変更のために
+# lint と依存ルールの設定、AGENTS.md を編集できる。変更は下書き PR になり、CODEOWNERS の承認を経てマージされる。
+# エージェントは自分の環境変数を変えられないので、手元のセッションではこの例外は効かない。
+if [ "${GITHUB_ACTIONS:-}" = "true" ] && [ "${FACTORY_JOB:-}" = "improve" ]; then
+  case "$rel" in
+    .dependency-cruiser.cjs|.oxlintrc.json|AGENTS.md) exit 0 ;;
+  esac
+fi
+
 case "$rel" in
   db/migrations/*|src/shared/auth/*|src/generated/*|\
-  infra/*|.github/workflows/*|Dockerfile|.env|.env.*|\
+  infra/*|.github/*|Dockerfile|.env|.env.*|\
   package.json|pnpm-lock.yaml|package-lock.json|yarn.lock|\
-  .cursor/hooks.json|.cursor/rules/*|.claude/settings.json|scripts/guard-paths.sh|\
-  .dependency-cruiser.cjs|.oxlintrc.json|CODEOWNERS|.github/CODEOWNERS|AGENTS.md)
+  .cursor/*|.claude/*|scripts/guard-paths.sh|scripts/check-edited-file.sh|lefthook.yml|\
+  .dependency-cruiser.cjs|.oxlintrc.json|CODEOWNERS|AGENTS.md|CLAUDE.md|docs/factory/*)
     printf '%s は保護パスです。編集する前にユーザーの明示的な許可を得てください(references/editing-constraints.md)。生成コードは生成元を直してください。\n' "$rel" >&2
     exit 2
     ;;

@@ -1,0 +1,7 @@
+# architecture-selection の lefthook.yml の pre-commit に、次のコマンドを足す。このファイル自体は置かない。
+# gitleaks の版によってコマンドが違う。v8.19 以降は `gitleaks git --pre-commit --staged`、
+# それより前は `gitleaks protect --staged`。導入した版の README で確認すること。
+pre-commit:
+  commands:
+    secrets:
+      run: gitleaks git --pre-commit --redact --staged --verbose

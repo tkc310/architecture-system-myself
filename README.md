@@ -17,15 +17,25 @@ AI 駆動開発で使い回すための設計のボイラープレート。ア�
 | M: modular | `modules/` + 公開 API + テーブルの所有。層なし | 3 人以上、または業務領域が 3 つ以上。ルールは単純 |
 | L: layered | `modules/` + domain / application / infrastructure | 4 人以上 かつ 複雑なドメインロジック かつ 仕様変更が頻繁 |
 
+[software-factory](.claude/skills/software-factory/SKILL.md) は、architecture-selection の出力の上に、Claude Code 向けのソフトウェアファクトリーを載せる。
+
+| 層 | 生成するもの |
+| --- | --- |
+| 工程 | 仕様化 → 計画 → 実装 → 検証 → 独立レビュー → 振り返り → マージ。準備完了と完了の定義、仕様の雛形 |
+| 役割 | サブエージェント `planner` / `implementer` / `reviewer` / `retro` と、コマンド `/spec` `/build` `/review` `/retro` |
+| ガードレール | 権限の allow / ask / deny、危険なコマンドの拒否、保護パス、検査を通さない完了の阻止、秘密情報の検出、CODEOWNERS |
+| CI | PR ごとのエージェントのレビュー、週次の改善ジョブ |
+| 改善ループ | PR ごとの振り返り(LESSONS.md)と、週次で規則を強める下書き PR。規則を緩める変更は自動では提案しない |
+
 ### 他のプロジェクトで使う
 
 ```sh
 # 個人のスキルとして登録する(Claude Code)
-cp -r .claude/skills/architecture-selection ~/.claude/skills/
+cp -r .claude/skills/architecture-selection .claude/skills/software-factory ~/.claude/skills/
 # Cursor では ~/.cursor/skills/ にコピーする
 ```
 
-対象のリポジトリで「アーキテクチャを選定して」「ARCHITECTURE.md を作って」「構造をレビューして」と頼むと使われる。
+対象のリポジトリで「アーキテクチャを選定して」「構造をレビューして」と頼むと architecture-selection が、「AI 駆動開発の工場を作って」「ガードレールを点検して」と頼むと software-factory が使われる。2 つは相互に参照するので、同じディレクトリに並べて置く。
 
 ## 構成
 
@@ -50,6 +60,14 @@ cp -r .claude/skills/architecture-selection ~/.claude/skills/
     ├── adr.md
     ├── module-AGENTS.md
     └── harness/                # oxlint / oxfmt / dependency-cruiser(S・M・L)/ Vitest / lefthook / CI / CODEOWNERS / Claude Code と Cursor のフック
+
+.claude/skills/software-factory/
+├── SKILL.md
+├── references/                 # stations / roles / guardrails / improvement-loop / audit-checklist
+└── templates/
+    ├── claude/                 # agents / skills(/spec /build /review /retro)/ hooks / settings.json
+    ├── github/                 # agent-review / factory-improve / secrets-scan / PR テンプレート
+    └── docs/                   # factory/README.md, factory/improve.md, specs/TEMPLATE.md
 ```
 
 ## 由来

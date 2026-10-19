@@ -26,11 +26,13 @@ src/
       commands/           # place-order.command.ts
       queries/            # get-order.query.ts
       services/           # 名詞単位の共通処理(stock.service.ts、pricing.service.ts)
-      ui/                 # この feature だけが使うコンポーネント
+      ui/                 # この feature の画面と部品(component-structure.md)
   shared/                 # DB 接続、認証、エラー処理など技術的な共通処理
     db/
       client.ts
       schema/             # テーブル定義
+    ui/                   # 画面を持つとき: 共通の部品。ds/ にデザインシステムの部品
+    layouts/              # 画面を持つとき: 全画面に共通する枠
   generated/              # 生成コード。手で編集しない
 db/migrations/
 ```
@@ -90,9 +92,9 @@ src/
       commands/
       queries/
       services/
-      ui/
+      ui/                 # このモジュールの画面と部品(component-structure.md)
       tables.ts           # このモジュールが所有するテーブル定義
-  shared/                 # DB 接続、認証、エラー処理。modules を import しない
+  shared/                 # DB 接続、認証、エラー処理、共通の ui/ と layouts/。modules を import しない
   generated/
 db/migrations/
 ```
@@ -134,8 +136,8 @@ src/
         ports.ts          # 外部 I/O のインターフェース
       infrastructure/     # ports の実装(DB、外部 API)
         tables.ts         # このモジュールが所有するテーブル定義
-      ui/
-  shared/                 # 横断的な基盤(ロガー、DB 接続、認証)。modules を import しない
+      ui/                 # このモジュールの画面と部品(component-structure.md)
+  shared/                 # 横断的な基盤(ロガー、DB 接続、認証、共通の ui/ と layouts/)。modules を import しない
   generated/
 db/migrations/
 ```
@@ -182,6 +184,8 @@ db/migrations/
 | `features/A/` の外から(`app/` を除く) | `features/A/index.ts` だけ |
 | `commands/`、`queries/` | 同じ feature の `services/`(M では `tables.ts` も)、他 feature の `index.ts`(service と query だけ)、`shared/` |
 | `services/` | 同じ feature の `services/`(M では `tables.ts` も)、他 feature の `index.ts`(service と query だけ)、`shared/` |
+| `ui/` | 同じ feature の `ui/` と `index.ts`、`shared/ui/`、`shared/lib/` |
+| `shared/ui/` | `shared/ui/`、`shared/lib/` |
 | `shared/` | `shared/` |
 
 **L(modules/)の依存ルール**
@@ -194,6 +198,8 @@ db/migrations/
 | `domain/` | 同じモジュールの `domain/` |
 | `application/` | 同じモジュールの `domain/` と `application/`(`ports.ts` を含む)、他モジュールの `index.ts`、`shared/` |
 | `infrastructure/` | 同じモジュールの `application/ports.ts`、`domain/`、`infrastructure/`、`shared/` |
+| `ui/` | 同じモジュールの `ui/` と `index.ts`、`shared/ui/`、`shared/lib/` |
+| `shared/ui/` | `shared/ui/`、`shared/lib/` |
 | `shared/` | `shared/` |
 
 - 循環依存を作らない。
@@ -225,6 +231,7 @@ db/migrations/
 **必須**
 
 - ファイル名とディレクトリ名は kebab-case にする。役割は接尾辞で示す(`*.command.ts`、`*.query.ts`、`*.service.ts`、`*.test.ts`)。
+  - 例外: `ui/` の下のコンポーネントのディレクトリは PascalCase、本体は `index.tsx`、カスタムフックは `useXxx.ts` にする([コンポーネントの構造](./component-structure.md))。
 - モジュール名(S では feature)は、利用者の業務の言葉にする(`billing`、`order`)。`utils`、`common`、`helpers` のような中身を示さない名前を `shared/` の外で使わない。
   - 理由: 名前から場所を推測できれば、エージェントがコードベース全体を検索しなくて済む。
 

@@ -57,6 +57,27 @@ module.exports = {
       to: { path: `${U}$1/`, pathNot: [`${U}$1/services/`, `${U}$1/tables\\.ts$`] },
     },
     {
+      name: "ui-scope",
+      severity: "error",
+      comment: "ui/ が同じモジュールの中で使えるのは ui/ と index.ts だけ。データは app/ から props で受け取る(component-structure.md)。",
+      from: { path: `${U}([^/]+)/ui/` },
+      to: { path: `${U}$1/`, pathNot: [`${U}$1/ui/`, `${U}$1/index\\.ts$`] },
+    },
+    {
+      name: "ui-no-server",
+      severity: "error",
+      comment: "ui/ は DB や認証などのサーバーの処理を import しない。",
+      from: { path: `${U}[^/]+/ui/` },
+      to: { path: "^src/shared/(db|auth)/" },
+    },
+    {
+      name: "shared-ui-scope",
+      severity: "error",
+      comment: "shared/ui/ は共通の部品だけ。shared/ui/ と shared/lib/ 以外を import しない。",
+      from: { path: "^src/shared/ui/" },
+      to: { path: "^src/", pathNot: "^src/shared/(ui|lib)/" },
+    },
+    {
       name: "shared-is-leaf",
       severity: "error",
       comment: "shared/ は技術的な共通処理だけ。app/ と modules を import しない。",

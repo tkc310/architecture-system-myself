@@ -68,12 +68,12 @@
 
 ### 置き場所と構造
 
-- 取り込んだ部品は、段階によらず共有の UI として `src/shared/ui/` に置き、feature やモジュールの `ui/` から import する。
-- `components.json` の `aliases.ui` を `src/shared/ui/` に、`aliases.lib` を `src/shared/lib/` に合わせる(8341-ui の `tv` などの共通処理が入る)。
+- 取り込んだ部品は、段階によらず `src/shared/ui/ds/` に置き、feature やモジュールの `ui/` から import する。自分で書く共通の部品(`src/shared/ui/` の PascalCase のディレクトリ)と分けるため([コンポーネントの構造](./component-structure.md))。
+- `components.json` の `aliases.ui` を `src/shared/ui/ds/` に、`aliases.lib` を `src/shared/lib/` に合わせる(8341-ui の `tv` などの共通処理が入る)。
 - 取り込んだ部品のファイルは手で書き換えない。直したいときは、8341-ui に Issue を出すか、プロジェクト側で包む部品を作る。
 - 部品を更新するときは、8341-ui の CHANGELOG(Releases の本文)で利用側の修正が要る変更(0.x では minor)を確かめ、`components.json` の URL の版を上げて、取り込んだ部品をすべて `make ui-update name="@8341/<name> …"` で取り込み直す。版を ARCHITECTURE.md にも書く。
   - 理由: 手で書き換えると、取り込み直したときに変更が消え、8341-ui の検証(アクセシビリティ、コントラスト)からも外れる。
-- `src/shared/ui/` を保護パスに加える。`scripts/guard-paths.sh` の case と `.github/CODEOWNERS` に足し、ARCHITECTURE.md の編集制約に書く([編集制約](./editing-constraints.md#保護パス))。
+- `src/shared/ui/ds/` を保護パスに加える。`scripts/guard-paths.sh` の case と `.github/CODEOWNERS` に足し、ARCHITECTURE.md の編集制約に書く([編集制約](./editing-constraints.md#保護パス))。
 
 ### DESIGN.md
 

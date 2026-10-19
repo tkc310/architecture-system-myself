@@ -20,7 +20,7 @@ ARCHITECTURE.md には採った値と外した理由だけを書き、ルール�
 
 ## ルールの優先順位
 
-承認とセキュリティのルール、編集制約、品質ゲート、それ以外の文書の順で採る。各ルールの「必須」は原則として採り、外すときは理由を ARCHITECTURE.md と ADR に書く。
+承認とセキュリティのルール(`references/human-approval.md`、`references/security.md`)、編集制約、品質ゲート、それ以外の文書の順で採る。各ルールの「必須」は原則として採り、外すときは理由を ARCHITECTURE.md と ADR に書く。
 
 ## 作業モード
 

@@ -134,6 +134,31 @@ const stream = fs.createReadStream(path);
 
 理由: コードを読めば分かることを書いている。なぜストリームにしたのかが書かれていない。
 
+#### コードを読めば分かることを書かない
+
+**悪い例**:
+```typescript
+// ユーザーIDを取得
+const userId = user.id;
+
+// ユーザー名が空かチェック
+if (user.name === '') {
+  // エラーを投げる
+  throw new Error('Name is required');
+}
+```
+
+**良い例**:
+```typescript
+const userId = user.id;
+
+if (user.name === '') {
+  throw new Error('Name is required');
+}
+```
+
+理由: コードがそのまま読めるなら、コメントは要らない。
+
 ### コメントを書く前の判断基準
 
 **必須**
@@ -171,10 +196,6 @@ const stream = fs.createReadStream(path);
 
 - 命名は kebab-case（ファイル名、ディレクトリ名）、camelCase（変数名、関数名）、PascalCase（型名、クラス名、コンポーネント名）を使い分ける。詳細は [構造](./principles.md) の命名を参照。
 - 行数の上限は、[構造](./principles.md) のファイルと関数の大きさを参照。
-
-## 詳細
-
-より詳しいガイドラインと例は、[t_wada のコメント法則スキル](https://github.com/tkc310/agents-playground/blob/main/skills/t-wada-comment-rules/SKILL.md) を参照。
 
 ## 参考
 

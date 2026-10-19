@@ -44,6 +44,8 @@ cp -r .claude/skills/architecture-selection .claude/skills/software-factory ~/.c
 ├── SKILL.md                    # 作業モードと手順
 ├── FEEDBACK.md                 # スキル自体の改善記録
 ├── references/                 # ルールの本文(README.md から読む)
+│   ├── human-approval.md       # 承認が要る操作(最優先)
+│   ├── security.md             # 秘密情報と外から入る文章(最優先)
 │   ├── hearing.md              # 前提条件のヒアリング
 │   ├── scale-selection.md      # S / M / L の判定と昇格・降格
 │   ├── tech-selection.md       # 技術選定と Go・Flutter の条件
@@ -71,7 +73,3 @@ cp -r .claude/skills/architecture-selection .claude/skills/software-factory ~/.c
     ├── scripts/factory/        # 無人ジョブ用: レビュー結果の投稿、下書き PR と Issue の作成、push 前の手元のレビュー
     └── docs/                   # factory/README.md, factory/improve.md, specs/TEMPLATE.md
 ```
-
-## 由来
-
-ルールは [tkc310/agents-playground の docs/architecture](https://github.com/tkc310/agents-playground/tree/main/docs/architecture) を元に、構造を 3 段階にし、性能対策の段階とハーネスの雛形を加えたもの。以後はこのリポジトリを正本とする。

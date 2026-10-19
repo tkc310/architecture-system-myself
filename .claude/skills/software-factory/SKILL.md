@@ -78,4 +78,4 @@ description: AI 駆動開発のソフトウェアファクトリー(工程、エ
 
 ## フィードバック
 
-このスキル自体の改善点は `FEEDBACK.md` に記録し、正本リポジトリ(`tkc310/architecture-system-myself`)への編集案を示す。編集はユーザーの承認を得てから PR で行う。
+このスキル自体の改善点は `FEEDBACK.md` に記録し、正本リポジトリ(`tkc310/system-factory`)への編集案を示す。編集はユーザーの承認を得てから PR で行う。

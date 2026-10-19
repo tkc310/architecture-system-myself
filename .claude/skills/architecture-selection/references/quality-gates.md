@@ -81,12 +81,13 @@
 
 **判断根拠**
 
-詳細は [Oxc エコシステムの調査ノート](https://github.com/tkc310/agents-playground/blob/main/tasks/adhoc/2026-10-08_oxc-ecosystem-research.md) を参照。2026-10 時点の根拠:
+2026-10 時点の根拠:
 
 - oxlint v1.87 stable、ルール 871、type-aware lint は 2026-07 に stable（[出典](https://oxc.rs/blog/2026-07-22-type-aware-linting-stable)）
 - oxfmt は JS/TS で Prettier 適合テスト 100%（[出典](https://oxc.rs/blog/2026-02-24-oxfmt-beta)）
 - Vite+ 1.0 が oxlint/oxfmt を統合（[出典](https://voidzero.dev/posts/announcing-vite-plus-1-0)）
-- 比較対象の Biome（v2.5）は単一ツールで安定だが、SCSS/YAML/Markdown の整形が未対応
+- 比較対象の Biome（v2.5）は単一ツールで安定だが、SCSS/YAML/Markdown の整形が未対応。これらの形式を扱わないプロジェクトでは選択肢になる
+- oxc-parser、oxc-transform、Rolldown は、oxlint/oxfmt と違い既存のビルドツールチェーンを大きく置き換えうるため、採用はユーザーに確認する（上記の必須）
 
 ## 依存関係の管理
 

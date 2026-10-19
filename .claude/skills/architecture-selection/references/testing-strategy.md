@@ -29,7 +29,7 @@
 **方針**:
 - Testing Trophy の中核として、最大のボリュームゾーンとする
 - ユーザーが見る・操作する部分（テキスト、ロール、インタラクション）に基づいてテストを書く
-- happy-dom を基本とし、約 30% の高速化を実現（[ベンチマーク記録](https://github.com/tkc310/agents-playground/blob/main/tasks/adhoc/2026-10-08_test-benchmark.md)参照）
+- happy-dom を基本とする。小規模な統合テストでは jsdom より約 3 割速かった（下の「判断根拠」）
 
 **例外**: 以下のケースでは Vitest Browser Mode を使用
 - 実ブラウザの挙動が必要なテスト
@@ -186,16 +186,29 @@
 
 ## 参考資料
 
-### テスト戦略の根拠
+### 判断根拠: 統合テストの実行環境(2026-10-08 の測定)
 
-- [AI駆動開発におけるフロントエンドテストのベストプラクティス](https://github.com/tkc310/agents-playground/blob/main/notes/2026-10-ai-driven-frontend-testing-best-practices.md)
-- [テスト実行環境のベンチマーク記録](https://github.com/tkc310/agents-playground/blob/main/tasks/adhoc/2026-10-08_test-benchmark.md)
+統合テスト 11 ケース(フォームとリストのコンポーネント)を、3 つの構成で 5 回ずつ実行し、ウォームアップを除いた中央値を比べた(Node.js 22.14、Vitest 5.0.3、Linux)。
+
+| 構成 | Vitest の所要時間 | 実時間 | 結果 |
+| --- | --- | --- | --- |
+| RTL + jsdom | 1.20 s | 1.62 s | 通過 |
+| Vitest Browser Mode(headless Chromium) | 1.52 s | 2.02 s | 通過 |
+| Browser Mode + `isolate: false` などの高速化 | — | — | テスト間で DOM の状態が残って失敗 |
+| RTL + happy-dom | 0.816 s | 1.23 s | 通過(採用) |
+
+- happy-dom は jsdom より約 3 割速く、3 構成で最も速かった。テスト間の干渉もなかった。
+- Browser Mode は、ブラウザの起動などの固定費で jsdom より遅い。速さではなく、実ブラウザでの正確さ(レイアウト、フォーカス、CSS、ブラウザの API)が要るテストにだけ使う。
+- happy-dom は DOM API の実装が jsdom より不完全な部分がある。実装されていない API に依存するテストは、Browser Mode か jsdom で実行する。
+- `isolate: false` などの高速化は、テスト間の独立性を損なうので使わない。
 
 ### 外部リソース
 
 - [Kent C. Dodds - The Testing Trophy and Testing Classifications](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications)
 - [Next.js - How to set up Vitest with Next.js](https://nextjs.org/docs/app/guides/testing/vitest)
 - [Building a Testing Infrastructure for AI-Assisted Development](https://micahking.dev/posts/testing-infrastructure-for-ai-assisted-development/)
+- [Vitest Browser Mode](https://vitest.dev/guide/browser/)
+- [happy-dom](https://github.com/capricorn86/happy-dom)
 
 ## ルールへのフィードバック
 

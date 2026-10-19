@@ -14,7 +14,7 @@
 4. [品質ゲート](./quality-gates.md) と [テスト戦略](./testing-strategy.md)。型、契約、テスト、リンターで機械に保証させる項目と、CI の基準を決める。
 5. [編集制約](./editing-constraints.md)。エージェントが編集してよいパス、保護するパス、人間の承認が要る操作を決める。
 
-文書どうしが食い違うときは、承認とセキュリティのルール（[human-approval](https://github.com/tkc310/agents-playground/blob/main/rules/human-approval.md)、[security](https://github.com/tkc310/agents-playground/blob/main/rules/security.md)）、編集制約、品質ゲート、それ以外の文書の順で採る。
+文書どうしが食い違うときは、[承認](./human-approval.md) と [セキュリティ](./security.md) のルール、編集制約、品質ゲート、それ以外の文書の順で採る。
 
 ## ルールの強さ
 
@@ -22,13 +22,15 @@
 
 | ルール | ARCHITECTURE.md での扱い |
 | --- | --- |
-| 承認とセキュリティのルール | 外せない。緩めることもできない |
+| [承認](./human-approval.md) と [セキュリティ](./security.md) のルール | 外せない。緩めることもできない |
 | 各文書の必須 | 原則として採る。外すときは、外す理由を ARCHITECTURE.md の「外したルール」と ADR に書く |
 | 推奨 | サービスごとに採るかどうかを決める |
 | 「目安」と書いた数値 | 初期値である。サービスごとの値を ARCHITECTURE.md に書く |
 
 ## 収録内容
 
+- [承認](./human-approval.md)：実行の前に人間の承認が要る操作と、要らない操作。最も優先する。
+- [セキュリティ](./security.md)：秘密情報、外から入る文章、有害な出力の扱い。最も優先する。
 - [前提条件のヒアリング](./hearing.md)：設計の前にユーザーに確認する項目と、聞き方。
 - [構造の段階の選び方](./scale-selection.md)：S / M / L の判定、段階による違い、昇格と降格の目安。
 - [技術選定](./tech-selection.md)：既定のスタック、システムの性質ごとの判断表、TypeScript の中で性能を上げる段階、Go と Flutter を選ぶ条件、エラー処理の方針、Go のサービスへ切り出せる状態の保ち方。

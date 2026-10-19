@@ -108,9 +108,9 @@
 5. 生成コードの差分確認（生成を実行して `git diff --exit-code`）
 6. ビルド
 
-インストールの前に、依存の供給網の設定(`.npmrc` の Takumi Guard と `pnpm-workspace.yaml` の `trustPolicy: no-downgrade`)が残っていることを確かめる([セキュリティ](./security.md#依存の供給網))。これはステージではなく、同じジョブの前処理にする。
+CI も手元と同じく `Makefile` のターゲットで叩く([規約](./coding-conventions.md#コマンドは-make-で叩く))。インストール(`make install`)は、その前に依存の供給網の設定(`.npmrc` の Takumi Guard と `pnpm-workspace.yaml` の `trustPolicy: no-downgrade`)が残っていることを確かめる([セキュリティ](./security.md#依存の供給網))。これはステージではなく、同じジョブの前処理にする。
 
-**推奨**: 依存パッケージの脆弱性検査(Takumi Guard は取得専用なので、`--registry=https://registry.npmjs.org/` を付ける)。版の鮮度の確認(`pnpm check:versions`)は、初期構築時と週次の見直しで行う。ネットワークの状態で結果が変わるので、マージを止める必須ステージには入れない。
+**推奨**: 依存パッケージの脆弱性検査(`make audit`。Takumi Guard は取得専用なので、`--registry=https://registry.npmjs.org/` を付けている)。版の鮮度の確認(`make check-versions`)は、初期構築時と週次の見直しで行う。ネットワークの状態で結果が変わるので、マージを止める必須ステージには入れない。
 
 ## 人間のレビューで見る項目
 

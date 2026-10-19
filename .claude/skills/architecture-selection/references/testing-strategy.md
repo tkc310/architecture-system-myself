@@ -86,7 +86,7 @@
 
 **方針**:
 - **CI には含めず**、アドホックに手動実行できるようにする
-- npm scripts 等で個別実行可能にする
+- `make test-e2e` で個別に実行できるようにする(中身は package.json の scripts。[規約](./coding-conventions.md#コマンドは-make-で叩く))
 
 ## 実行方針
 

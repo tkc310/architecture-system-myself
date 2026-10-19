@@ -81,6 +81,24 @@ fi
 # 依存の取得元と供給網の検査(.npmrc の registry、pnpm-workspace.yaml の trustPolicy など)を、コマンドの引数や環境変数で上書きさせない
 has_i '(^|[[:space:];&|(])(npm|pnpm|yarn)[[:space:]]+config[[:space:]]+(set|delete|rm)|--registry([=[:space:]]|$)|(^|[^[:alnum:]_])(npm|pnpm)_config_|--config\.|--(trust-policy|minimum-release-age|block-exotic-subdeps|dangerously-allow-all-builds)|(>|tee[[:space:]]|sed[[:space:]]+-i).*(\.npmrc|pnpm-workspace\.yaml)' \
   && deny "依存の取得元や供給網の検査を変える操作" "取得元と検査の設定は人が変える(.npmrc と pnpm-workspace.yaml は保護パス)。公開は人が --registry を付けて行う"
+# コマンドは Makefile のターゲットで叩く(architecture-selection の references/coding-conventions.md)。
+# 引用符の中(コミットメッセージなど)は対象にしないため、引用符で囲んだ部分を消してから、コマンドの位置にあるかを見る。
+scan_nq=$(printf '%s' "$scan" | sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g")
+cmdpos='(^|[;&|(]|&&|\|\||\$\(|`|xargs[[:space:]]+|exec[[:space:]]+|env[[:space:]]+|time[[:space:]]+|sudo[[:space:]]+)[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*'
+if printf '%s\n' "$scan_nq" | grep -Eq -- "${cmdpos}((pnpm|pnpx|npx|npm|yarn|bun|bunx|corepack|vitest|oxlint|oxfmt|tsc|depcruise|playwright|lefthook|tsx|drizzle-kit|shadcn)([[:space:]]|$)|(\./)?node_modules/\.bin/|node[[:space:]]+scripts/)"; then
+  deny "make を通さないコマンド" "Makefile のターゲットを使う(make help で一覧)。足りなければ、Makefile にターゲットを足すことを人に提案する"
+fi
+# make の呼び方を絞る。オプション(-f、-C、-e、--eval など)と、pkg= と name= 以外の変数の指定(SHELL= などでレシピを書き換えられる)を拒否する
+if printf '%s\n' "$scan_nq" | grep -Eq -- "${cmdpos}(g?make)([[:space:]]|$)"; then
+  printf '%s\n' "$scan_dq" | grep -Eq -- '(^|[[:space:]])(MAKE[A-Z_]*|GNUMAKEFLAGS)=' \
+    && deny "make の動きを変える環境変数" "make <ターゲット> だけで叩く"
+  printf '%s\n' "$scan_nq" | grep -Eq -- '(^|[[:space:];&|(])g?make([[:space:]]+[^;&|)]*)?[[:space:]]-' \
+    && deny "make のオプション" "make <ターゲット> だけで叩く"
+  printf '%s\n' "$scan" | grep -Eq -- '(^|[[:space:];&|(])g?make[[:space:]]([^;&|)]*[[:space:]])?([A-Za-z_.][A-Za-z0-9_.]*)=' \
+    && ! printf '%s\n' "$scan" | grep -Eq -- '(^|[[:space:];&|(])g?make[[:space:]]([^;&|)=]*[[:space:]])?((pkg|name)=('"'"'[^'"'"']*'"'"'|"[^"]*"|[^[:space:]]*)[[:space:]]*)+([^;&|)=]*)$' \
+    && deny "make の変数の指定(pkg= と name= 以外)" "値は pkg= か name= で渡す"
+fi
+
 has '(kubectl|helm)[[:space:]]+(apply|delete|upgrade|install)|terraform[[:space:]]+(apply|destroy)|(vercel|netlify|flyctl|fly|wrangler)[[:space:]].*(deploy|--prod)' \
   && deny "本番や共有環境への操作" "デプロイは CI と人の承認を通す"
 
@@ -161,7 +179,7 @@ if [ -n "${FACTORY_JOB:-}" ]; then
   common="git (diff|log|show|status|rev-parse)( .*)?|git fetch origin ${ref}|gh api (-H Q )?Q( .*)?|gh api (-H Q )?repos/[^ ]+( .*)?|gh run (list|view)( .*)?|(cat|ls|head|tail|wc|jq|grep|date|echo|pwd)( .*)?"
   case "$FACTORY_JOB" in
     review)  allowed="${common}|git checkout --detach (FETCH_HEAD|${ref})|(\./)?scripts/factory/post-review\.sh [0-9]+ (approve|changes)" ;;
-    improve) allowed="${common}|git switch (-c )?factory/improve-[A-Za-z0-9._-]+|git add( -A)?( [^ -][^ ]*)*|git commit (-m Q|-F -)|git push -u origin factory/improve-[A-Za-z0-9._-]+|pnpm (check|check:versions|lint|lint:deps|test|format)|(\./)?scripts/factory/(open-draft-pr\.sh factory/improve-[A-Za-z0-9._-]+ Q|open-issue\.sh Q)" ;;
+    improve) allowed="${common}|git switch (-c )?factory/improve-[A-Za-z0-9._-]+|git add( -A)?( [^ -][^ ]*)*|git commit (-m Q|-F -)|git push -u origin factory/improve-[A-Za-z0-9._-]+|make (check|check-versions|lint|lint-deps|test|format)|(\./)?scripts/factory/(open-draft-pr\.sh factory/improve-[A-Za-z0-9._-]+ Q|open-issue\.sh Q)" ;;
     *) deny "不明な FACTORY_JOB(${FACTORY_JOB})" "review か improve を設定する" ;;
   esac
   printf '%s' "$unq" | grep -Eq -- "^(${allowed})$" \
@@ -175,8 +193,8 @@ if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
 fi
 
 # ---- 確認: 承認が要る操作 ----
-has '(pnpm|npm|yarn|bun)[[:space:]]+(add|install[[:space:]]+[^-]|i[[:space:]]+[^-]|remove|rm|uninstall)' \
-  && ask "依存の追加や削除です。目的、代替、ライセンス、保守状況を確認してください。"
+has '(^|[[:space:];&|(])g?make[[:space:]]([^;&|]*[[:space:]])?(add|add-dev|remove|install|setup|generate|ui-add|ui-update)([[:space:]]|$)' \
+  && ask "依存の追加や削除、取り込みです。目的、代替、ライセンス、保守状況を確認してください。"
 has 'drizzle-kit[[:space:]]+(push|migrate)|prisma[[:space:]]+(migrate[[:space:]]+deploy|db[[:space:]]+push)|DATABASE_URL=' \
   && ask "マイグレーションの適用か、データベースへの接続先の指定です。対象の環境を確認してください。"
 has 'git[[:space:]]+push' \

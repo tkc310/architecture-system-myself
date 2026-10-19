@@ -54,11 +54,11 @@ npm のパッケージは、公開者のアカウントの乗っ取りや、悪�
   - 取得の記録と、取得後に悪性と分かったときの通知が要る人は、メールで登録したトークン(`tg_anon_…`)を各自の `~/.npmrc` に `//npm.flatt.tech/:_authToken=…` で書く。
   - 組織で使うとき(有償)は、CI で [setup-takumi-guard-npm](https://github.com/flatt-security/setup-takumi-guard-npm) に `bot-id` を渡し、GitHub の OIDC で短期のトークンを得る。長期のシークレットは置かない。
 - `trustPolicy` で止まった版を `trustPolicyExclude` で外すときは、版まで指定し(`pkg@1.2.3`)、公開元の告知で理由を確かめ、ADR に書いて承認を得る。名前だけで外さない。止まったら、まず一つ前の版を使う。
-- エージェントに、取得元や検査の設定をコマンドで上書きさせない(`--registry`、`pnpm config set`、`npm_config_*`、`--config.*`)。software-factory のガードレールはこれを拒否する。
+- エージェントに、取得元や検査の設定をコマンドで上書きさせない(`--registry`、`pnpm config set`、`npm_config_*`、`--config.*`)。依存の追加と取得は `make add` と `make install` から行い、どちらも先に `make check-supply-chain` を通す。software-factory のガードレールはこれを拒否する。
 
 **推奨**
 
-- Takumi Guard は取得専用。公開(`pnpm publish`)と脆弱性の照会(`pnpm audit`)は、`--registry=https://registry.npmjs.org/` を付けて npm の公式のレジストリに行う。
+- Takumi Guard は取得専用。公開(`pnpm publish`)と脆弱性の照会(`make audit`)は、`--registry=https://registry.npmjs.org/` を付けて npm の公式のレジストリに行う。
 - 非公開のパッケージを scope ごとに別のレジストリ(`@org:registry=…`)から取ると、そのパッケージは Takumi Guard の検査を通らない。scope の外の依存は Takumi Guard から取る。
 - 導入後の確認: 依存に加えない作業用のディレクトリで、Takumi Guard の検査用のパッケージ `@panda-guard/test-malicious` の取得が 403 になることを確かめる。
 

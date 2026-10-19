@@ -30,7 +30,7 @@ Issue → /spec → [人が承認] → /build → /review → PR → GitHub 側�
 
 ## 完了の定義
 
-- [ ] `pnpm check` が通る
+- [ ] `make check` が通る
 - [ ] 受け入れ条件ごとにテストがあり、PR で対応を示した
 - [ ] reviewer の必須の指摘がない
 - [ ] 仕様の範囲外の変更がない

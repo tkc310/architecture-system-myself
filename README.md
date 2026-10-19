@@ -6,6 +6,7 @@ AI 駆動開発で使い回すための、設計と開発工程のボイラー�
 - 構造は、開発人数・業務領域の数・業務ルールの複雑さで S / M / L の 3 段階から選ぶ。シンプルな CRUD にドメイン層もリポジトリ層も作らない
 - 画面があるときは、デザインシステムを「[8341-ui](https://github.com/tkc310/8341ui) を使わない / 使う / 8341-ui をひな形に作る」から選ぶ
 - 境界は文章ではなく、型・oxlint・dependency-cruiser・テスト・フックで機械的に守る
+- コマンドの入口は `Makefile` に一つにし、人もエージェントも CI も `make` で叩く
 - 依存の供給網は、既定で pnpm の `trustPolicy: no-downgrade` と [Takumi Guard](https://shisho.dev/docs/t/guard/quickstart/npm/) のレジストリで守る
 - 指摘を記録し、繰り返すものを機械的なルールに昇格させて自己改善する
 
@@ -44,7 +45,7 @@ cp -r .claude/skills/architecture-selection .claude/skills/software-factory <対
 3. 技術スタックと、性能の要件があれば性能対策の段階
 4. 画面があれば、デザインシステムの選択(下の表)
 5. ディレクトリ構成、ハーネス(oxlint、oxfmt、dependency-cruiser、Vitest、lefthook、CI)、ARCHITECTURE.md、ADR の生成
-6. `pnpm check` で検証
+6. `make check` で検証(コマンドはすべて `Makefile` のターゲットにし、`make` で叩く)
 
 | デザインシステム | 行うこと |
 | --- | --- |

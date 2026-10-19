@@ -12,7 +12,7 @@
 //      - 版を固定した URL(/r/v<版>/)なら、そのリポジトリの最新のリリースと比べる。固定していなければ知らせる
 //
 // 使い方:
-//   node scripts/check-versions.mjs            # 結果を表で出す。古いものがあれば終了コード 1
+//   make check-versions                        # (= node scripts/check-versions.mjs)結果を表で出す。古いものがあれば終了コード 1
 //   node scripts/check-versions.mjs --json     # JSON で出す
 //   node scripts/check-versions.mjs --no-actions --no-node --no-registries
 //

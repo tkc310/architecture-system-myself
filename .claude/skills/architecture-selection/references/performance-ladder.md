@@ -53,7 +53,7 @@ Effect の Fiber は**一つのスレッドで動く軽量な並行処理**で�
   - 切り出すのは、測定で特定したモジュールだけ。サービス全体を置き換えない。
   - TypeScript との境界は OpenAPI で定義し、双方の型を生成する（openapi-typescript、oapi-codegen など）。手書きの型を作らない。
   - ルーティングは標準の `net/http` から始める。DB アクセスは sqlc と pgx。
-  - Go 側にもハーネスを置く: gofumpt、golangci-lint、`go test -race`、OpenAPI に対する契約テスト。
+  - Go 側にもハーネスを置く: gofumpt、golangci-lint、`go test -race`、OpenAPI に対する契約テスト。Go のコマンドも同じ `Makefile` のターゲットにし(`make check` から Go の検査も呼ぶ)、入口を一つに保つ。
 - 構成:
 
 ```

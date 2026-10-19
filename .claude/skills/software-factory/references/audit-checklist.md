@@ -4,7 +4,7 @@
 
 ## 生成後の点検
 
-- [ ] architecture-selection のハーネスがあり、`pnpm check` が通る
+- [ ] architecture-selection のハーネスがあり、`make check` が通る。コマンドの入口が `Makefile` に一つで、エージェントが `pnpm` や各ツールを直接叩くと拒否される
 - [ ] `.claude/agents/` に 4 つの役割があり、`reviewer` のツールに Edit と Write がない
 - [ ] `/spec`、`/build`、`/review`、`/retro` が使える
 - [ ] `.claude/settings.json` に、権限(allow / ask / deny)とフック(PreToolUse 2 つ、PostToolUse、Stop)がある

@@ -11,20 +11,24 @@
 
 ## コマンド
 
+コマンドはすべて `make` で叩く。`pnpm`、`npx`、各ツールを直接叩かない。一覧は `make help`。足りないターゲットは、`Makefile`(保護パス)に足すことを提案する。
+
 | 目的 | コマンド |
 | --- | --- |
-| 完了前に必ず通す | `pnpm check` |
-| 整形 | `pnpm format` |
-| lint / 依存ルール | `pnpm lint` / `pnpm lint:deps` |
-| 型チェック | `pnpm typecheck` |
-| テスト | `pnpm test` |
-| E2E(手動) | `pnpm test:e2e` |
+| 完了前に必ず通す | `make check` |
+| 整形 | `make format` |
+| lint / 依存ルール | `make lint` / `make lint-deps` |
+| 型チェック | `make typecheck` |
+| テスト | `make test` |
+| E2E(手動) | `make test-e2e` |
+| 依存の追加と削除(承認が要る) | `make add pkg="<名前>"` / `make add-dev pkg="<名前>"` / `make remove pkg="<名前>"` |
+| 版の鮮度 | `make check-versions` |
 
 ## 作業の進め方
 
 - 作業の開始時に作業の種類(機能の追加、バグの修正、リファクタリング、テストの追加)を決め、その範囲の外のファイルを編集する必要が出たら、編集する前に確認する。
 - 期待する振る舞いをテストに先に書き、それを満たす実装を書く。
-- `pnpm check` が通らない状態で完了と報告しない。
+- `make check` が通らない状態で完了と報告しない。
 - 検査を通すためにルールを無効化しない(lint の無効化コメント、依存ルールの除外、型アサーション)。必要なら理由を添えて確認する。
 - 構造の段階が要求しない層(S と M での `domain/`、`ports.ts`、リポジトリ層)を作らない。必要に感じたら ADR の昇格条件を確かめ、提案する。
 

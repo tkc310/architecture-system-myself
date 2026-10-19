@@ -1,5 +1,6 @@
 # 品質ゲートの必須ステージ(references/quality-gates.md)。すべてをブランチ保護の必須チェックに指定する。
-# E2E と VRT は実行コストが高いので CI に含めず、手元で pnpm test:e2e を実行する(references/testing-strategy.md)。
+# E2E と VRT は実行コストが高いので CI に含めず、手元で make test-e2e を実行する(references/testing-strategy.md)。
+# 手元と同じく、コマンドはすべて Makefile のターゲットで叩く(references/coding-conventions.md)。
 name: ci
 
 on:
@@ -19,27 +20,23 @@ jobs:
         with:
           node-version: lts/*
           cache: pnpm
-      # インストールの前に、依存の供給網の設定が外されていないことを確かめる(references/security.md)
-      - name: 依存の供給網の設定
-        run: |
-          grep -Eq '^registry=https://npm\.flatt\.tech/?$' .npmrc || { echo '.npmrc の registry が Takumi Guard ではない'; exit 1; }
-          grep -Eq '^trustPolicy:[[:space:]]*no-downgrade[[:space:]]*$' pnpm-workspace.yaml || { echo 'pnpm-workspace.yaml に trustPolicy: no-downgrade がない'; exit 1; }
-      - run: pnpm install --frozen-lockfile
+      # make install は、インストールの前に依存の供給網の設定(make check-supply-chain)を確かめる(references/security.md)
+      - run: make install
 
       - name: 1. フォーマットの確認
-        run: pnpm format:check
+        run: make format-check
       - name: 2. lint と依存ルール
         run: |
-          pnpm lint
-          pnpm lint:deps
+          make lint
+          make lint-deps
       - name: 3. 型チェック
-        run: pnpm typecheck
+        run: make typecheck
       - name: 4. テストとカバレッジの閾値
-        run: pnpm test:coverage
+        run: make test-coverage
       - name: 5. 生成コードの差分
-        run: pnpm generate:check
+        run: make generate-check
       - name: 6. ビルド
-        run: pnpm build
+        run: make build
 
   audit:
     # 推奨: 依存パッケージの脆弱性検査
@@ -51,5 +48,5 @@ jobs:
         with:
           node-version: lts/*
           cache: pnpm
-      # Takumi Guard は取得専用のプロキシなので、脆弱性の照会は npm の公式のレジストリに行う
-      - run: pnpm audit --prod --registry=https://registry.npmjs.org/
+      # Takumi Guard は取得専用のプロキシなので、脆弱性の照会は npm の公式のレジストリに行う(Makefile の audit)
+      - run: make audit

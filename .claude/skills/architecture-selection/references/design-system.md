@@ -45,12 +45,14 @@
    ```
 
    - 理由: 版のない URL(`/r/{name}.json`)は常に 8341-ui の main の最新を返すので、取り込み直すたびに部品が変わりうる。版を固定すると、更新を自分で選べる。
-   - `pnpm check:versions` は、固定した版がリリースの最新より古いか、版を固定していないときに知らせる([ハーネス](../templates/harness/README.md) の「版の確認」)。
+   - `make check-versions` は、固定した版がリリースの最新より古いか、版を固定していないときに知らせる([ハーネス](../templates/harness/README.md) の「版の確認」)。
 
 2. 土台と、使う部品を取り込む。
 
+   shadcn の CLI は `make add-dev pkg=shadcn` で開発用の依存に入れ(版を固定し、`make check-versions` で鮮度を見るため)、`make ui-add` で取り込む。
+
    ```bash
-   npx shadcn@latest add @8341/8341-base @8341/button @8341/form-field @8341/text-field
+   make ui-add name="@8341/8341-base @8341/button @8341/form-field @8341/text-field"
    ```
 
 3. 全体の CSS でテーマを読み込む。
@@ -75,7 +77,7 @@
 
 - `components.json` の `aliases.ui` を上の置き場所に、`aliases.lib` を `src/shared/lib/` に合わせる(8341-ui の `tv` などの共通処理が入る)。
 - 取り込んだ部品のファイルは手で書き換えない。直したいときは、8341-ui に Issue を出すか、プロジェクト側で包む部品を作る。
-- 部品を更新するときは、8341-ui の CHANGELOG(Releases の本文)で利用側の修正が要る変更(0.x では minor)を確かめ、`components.json` の URL の版を上げて、取り込んだ部品をすべて `npx shadcn@latest add @8341/<name> --overwrite` で取り込み直す。版を ARCHITECTURE.md にも書く。
+- 部品を更新するときは、8341-ui の CHANGELOG(Releases の本文)で利用側の修正が要る変更(0.x では minor)を確かめ、`components.json` の URL の版を上げて、取り込んだ部品をすべて `make ui-update name="@8341/<name> …"` で取り込み直す。版を ARCHITECTURE.md にも書く。
   - 理由: 手で書き換えると、取り込み直したときに変更が消え、8341-ui の検証(アクセシビリティ、コントラスト)からも外れる。
 - `src/shared/ui/` の 8341-ui の部品は、[編集制約](./editing-constraints.md) の保護パスに加える。
 

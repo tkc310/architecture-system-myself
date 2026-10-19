@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stop。コードに変更があるのに pnpm check が通らない状態での完了を止め、失敗の内容をエージェントに返す。
+# Stop。コードに変更があるのに make check が通らない状態での完了を止め、失敗の内容をエージェントに返す。
 # 同じセッションで 2 回止めても直らないときは、止めずに人へ引き継ぐ(無限に続けない)。
 set -uo pipefail
 
@@ -15,7 +15,7 @@ session=$(printf '%s' "$input" | jq -r '.session_id // "unknown"' 2>/dev/null)
 counter="${TMPDIR:-/tmp}/factory-stop-${session}"
 count=$(cat "$counter" 2>/dev/null || echo 0)
 
-if out=$(pnpm check 2>&1); then
+if out=$(make check 2>&1); then
   rm -f "$counter"
   exit 0
 fi
@@ -28,7 +28,7 @@ fi
 
 echo $((count + 1)) > "$counter"
 {
-  echo "pnpm check が通っていません。完了と報告する前に直してください(規則を無効化しないこと)。"
+  echo "make check が通っていません。完了と報告する前に直してください(規則を無効化しないこと)。"
   echo "直せない理由があるなら、その理由と現状を人に説明してください。"
   echo "---- 失敗の末尾 ----"
   printf '%s\n' "$out" | tail -n 40

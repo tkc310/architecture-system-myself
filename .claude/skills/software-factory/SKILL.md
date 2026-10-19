@@ -9,7 +9,7 @@ description: AI 駆動開発のソフトウェアファクトリー(工程、エ
 
 ## 前提
 
-- 対象リポジトリに `ARCHITECTURE.md` と、architecture-selection のハーネス(`pnpm check`、`.dependency-cruiser.cjs`、`scripts/guard-paths.sh`、`docs/feedback/LESSONS.md`)があること。なければ先に architecture-selection を実行する。
+- 対象リポジトリに `ARCHITECTURE.md` と、architecture-selection のハーネス(`Makefile` と `make check`、`.dependency-cruiser.cjs`、`scripts/guard-paths.sh`、`docs/feedback/LESSONS.md`)があること。なければ先に architecture-selection を実行する。
 - 工場は、ハーネスが機械で保証することを前提に、人とエージェントの役割分担と、その間の受け渡しを決める。ハーネスの規則を工場の側で書き直さない。
 
 ## 読むもの

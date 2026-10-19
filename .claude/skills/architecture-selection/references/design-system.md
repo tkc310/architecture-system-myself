@@ -34,15 +34,18 @@
 
 ### 取り込み方
 
-部品のコードをプロジェクトに取り込む shadcn 方式を使う。npm のパッケージは使わない(8341-ui は既定で npm に公開していない)。
+部品のコードをプロジェクトに取り込む shadcn 方式を使う。8341-ui は npm にも公開できる(任意)が、部品のコードを取り込む shadcn 方式を正とする。
 
-1. `components.json` にレジストリを登録する。
+1. 8341-ui の [GitHub Releases](https://github.com/tkc310/8341ui/releases) で最新の版(タグ `8341-ui@<版>`)を確かめ、その版を固定したレジストリを `components.json` に登録する。版は記憶で書かない。
 
    ```json
    {
-     "registries": { "@8341": "https://tkc310.github.io/8341ui/r/{name}.json" }
+     "registries": { "@8341": "https://tkc310.github.io/8341ui/r/v<版>/{name}.json" }
    }
    ```
+
+   - 理由: 版のない URL(`/r/{name}.json`)は常に 8341-ui の main の最新を返すので、取り込み直すたびに部品が変わりうる。版を固定すると、更新を自分で選べる。
+   - `pnpm check:versions` は、固定した版がリリースの最新より古いか、版を固定していないときに知らせる([ハーネス](../templates/harness/README.md) の「版の確認」)。
 
 2. 土台と、使う部品を取り込む。
 
@@ -71,7 +74,8 @@
 | M、L | `src/shared/ui/`(モジュールの `ui/` から import する) |
 
 - `components.json` の `aliases.ui` を上の置き場所に、`aliases.lib` を `src/shared/lib/` に合わせる(8341-ui の `tv` などの共通処理が入る)。
-- 取り込んだ部品のファイルは手で書き換えない。直したいときは、8341-ui に Issue を出すか、プロジェクト側で包む部品を作る。部品を更新するときは `npx shadcn@latest add @8341/<name> --overwrite` で取り込み直す。
+- 取り込んだ部品のファイルは手で書き換えない。直したいときは、8341-ui に Issue を出すか、プロジェクト側で包む部品を作る。
+- 部品を更新するときは、8341-ui の CHANGELOG(Releases の本文)で利用側の修正が要る変更(0.x では minor)を確かめ、`components.json` の URL の版を上げて、取り込んだ部品をすべて `npx shadcn@latest add @8341/<name> --overwrite` で取り込み直す。版を ARCHITECTURE.md にも書く。
   - 理由: 手で書き換えると、取り込み直したときに変更が消え、8341-ui の検証(アクセシビリティ、コントラスト)からも外れる。
 - `src/shared/ui/` の 8341-ui の部品は、[編集制約](./editing-constraints.md) の保護パスに加える。
 
@@ -95,13 +99,14 @@
 
 1. ユーザーの承認を得る(新しいリポジトリを作るため)。
 2. 8341-ui を手元に複製し、そのリポジトリで Claude Code を開いて `/ds-factory` を実行する。手順は 8341-ui の `docs/factory.md` と `.claude/skills/ds-factory/SKILL.md` に従う。ヒアリングで、名前、接頭辞、キーカラー、位置づけ(共有の基盤か専用か)などを決める。
-3. 生成したデザインシステムのリポジトリで `pnpm check && pnpm test` を通し、GitHub に公開して、レジストリ(GitHub Pages)を配信する。
-4. このサービスでは、B と同じ方法で取り込む。レジストリの名前空間と URL は、生成したものに置き換える(例: `@acme`、`https://<owner>.github.io/<リポジトリ名>/r/{name}.json`)。
-5. 作ったデザインシステムのリポジトリ名、レジストリの URL、接頭辞を ARCHITECTURE.md と ADR に書く。
+3. 生成したデザインシステムのリポジトリで `mise install`(`.tool-versions` の道具を入れる)、`pnpm check && pnpm test` を通し、GitHub に公開して、レジストリ(GitHub Pages)を配信する。
+4. 最初の版をリリースする(`pnpm release:version` の PR をマージしてから `pnpm release:publish`。手順はそのリポジトリの `docs/releasing.md`)。これで版を固定したレジストリ `r/v<版>/` と GitHub Releases ができる。リリースは、権限のある人が手元で行う。
+5. このサービスでは、B と同じ方法で、版を固定して取り込む。レジストリの名前空間と URL は、生成したものに置き換える(例: `@acme`、`https://<owner>.github.io/<リポジトリ名>/r/v<版>/{name}.json`)。
+6. 作ったデザインシステムのリポジトリ名、レジストリの URL、接頭辞を ARCHITECTURE.md と ADR に書く。
 
 ## ARCHITECTURE.md と ADR に書くこと
 
 - 選択(A / B / C)と理由
-- B と C: レジストリの URL、名前空間、取り込んだ部品、DESIGN.md の場所
+- B と C: レジストリの URL(固定した版を含む)、名前空間、取り込んだ部品、DESIGN.md の場所
 - C: 作ったデザインシステムのリポジトリ
 - 見直し条件(A から B / C に移る条件など)

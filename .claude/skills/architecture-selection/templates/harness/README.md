@@ -16,15 +16,37 @@
 | `.github/workflows/ci.yml` | 同じパス | 6 つのステージをブランチ保護の必須チェックに指定する |
 | `.github/CODEOWNERS` | 同じパス | 担当者を埋め、ブランチ保護で「コードオーナーのレビューを必須にする」を有効にする |
 | `scripts/guard-paths.sh`、`scripts/check-edited-file.sh` | 同じパス | `chmod +x`。どちらも `jq` を使う |
+| `scripts/check-versions.mjs` | 同じパス | 依存、Node.js、GitHub Actions、デザインシステムのレジストリが最新の安定版かを調べる。`pnpm check:versions` で実行する(下の「版の確認」) |
 | `.claude/settings.json` | 同じパス | Claude Code を使う場合。保護パスの拒否と、編集後の検査 |
 | `.cursor/hooks.json` | 同じパス | Cursor を使う場合。保護パスの拒否 |
 | `docs/feedback/LESSONS.md` | 同じパス | そのまま置く |
 
 保護パスは、指示だけでなく二つ以上の仕組みで守る。既定では、エージェントのフック(Claude Code と Cursor の両方、または使う方)と CODEOWNERS + ブランチ保護の二つで守る。
 
+## 版の確認
+
+雛形の版は、書いた時点のもの。置いたら、依存を入れた後に必ず次を実行し、古いものとプレリリースを直す。
+
+```sh
+pnpm check:versions   # node scripts/check-versions.mjs
+```
+
+| 調べるもの | 比べる相手 |
+| --- | --- |
+| `package.json`(と `packages/*`、`apps/*`、pnpm の catalog)の依存 | npm の `latest`(安定版)。指定がプレリリース(`-rc` など)なら知らせる |
+| Node.js(`.tool-versions`、`.nvmrc`、`engines`) | 最新の LTS |
+| `.github/workflows/*.yml` の `uses: owner/repo@vN` | 各 Action の最新のリリースの major |
+| `components.json` の GitHub Pages のレジストリ(8341-ui など) | そのリポジトリの最新のリリース。URL に版(`/r/v<版>/`)がなければ知らせる |
+
+- 終了コード 0 はすべて最新、1 は古いもの、プレリリース、版の指定がないものがある、2 は取得できなかったものだけがある。取得できなかったものは、公式の情報で手で確かめる。
+- 最新の安定版にしない場合(互換性の問題、組織の標準)は、理由を ADR に書く。
+- GitHub Actions の major を上げるときは、その Action のリリースノートで入力の変更を確かめる。デザインシステムの版を上げるときは [デザインシステム](../../references/design-system.md) の更新の手順に従う。
+- 調べないものは `--no-node`、`--no-actions`、`--no-registries` で外せる。
+- ネットワークに出られない環境では、`NPM_REGISTRY`、`NODE_DIST_URL`、`GITHUB_API` で問い合わせ先を変えられる。
+
 ## 置いた後の確認
 
-1. `pnpm check` が空の雛形で通る。
+1. `pnpm check` が空の雛形で通る。`pnpm check:versions` で古いものとプレリリースがない。
 2. 次の境界違反を一時的に置き、`pnpm lint:deps` が失敗することを確かめてから消す。
    - S: `src/app/` から `src/features/<f>/queries/` を直接 import する
    - M: あるモジュールの query から、別のモジュールの `tables.ts` を import する

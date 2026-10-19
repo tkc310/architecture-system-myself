@@ -24,6 +24,8 @@ GitHub の情報は REST API(`gh api 'repos/{owner}/{repo}/...'`)だけで読む
   - エージェントのレビュー: `gh api 'repos/{owner}/{repo}/issues/<番号>/comments'` のうち、`<!-- factory-review` で始まるコメント
   - 人のレビュー: `gh api 'repos/{owner}/{repo}/pulls/<番号>/comments'` と `gh api 'repos/{owner}/{repo}/pulls/<番号>/reviews'`
 
+- 版の鮮度: `pnpm check:versions` を実行し、古い依存、プレリリース、古い GitHub Actions、古い Node.js を数える。
+
 ### 2. 候補を選ぶ
 
 次のどれかに当たるものを昇格の候補にする。
@@ -31,6 +33,8 @@ GitHub の情報は REST API(`gh api 'repos/{owner}/{repo}/...'`)だけで読む
 - LESSONS.md で回数が 2 以上の行
 - 同じ規則で、異なる PR の CI が 2 回以上落ちた(規則はあるが、エージェントが事前に気づけていない。AGENTS.md や役割の定義に、事前に確かめる手順を足す候補)
 - 同じ種類の必須の指摘が、異なる PR で 2 回以上出た
+
+版の鮮度で古いものがあれば、規則の昇格とは別に、`open-issue.sh` で 1 件の Issue にまとめる(`package.json`、ロックファイル、`.github/` は保護パスなので、このジョブは直さない)。Issue には、名前、今の指定、最新の安定版、major が上がるものはリリースノートの URL を書く。
 
 ### 3. 昇格先を決める
 
@@ -64,6 +68,7 @@ LESSONS.md の運用ルールの優先順位(型 → 依存ルール → lint �
 | LESSONS.md の追記・更新 | |
 | CI の失敗(ステップ別) | フォーマット n / lint n / 依存ルール n / 型 n / テスト n / 生成コード n / ビルド n |
 | 必須のレビュー指摘 | |
+| 版の鮮度(古い / プレリリース) | 依存 n / Node.js n / GitHub Actions n |
 
 ### 昇格した候補
 | 誤りの種類 | 根拠 | 昇格先 | PR |

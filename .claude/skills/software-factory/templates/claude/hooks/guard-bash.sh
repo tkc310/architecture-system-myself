@@ -158,7 +158,7 @@ if [ -n "${FACTORY_JOB:-}" ]; then
   common="git (diff|log|show|status|rev-parse)( .*)?|git fetch origin ${ref}|gh api (-H Q )?Q( .*)?|gh api (-H Q )?repos/[^ ]+( .*)?|gh run (list|view)( .*)?|(cat|ls|head|tail|wc|jq|grep|date|echo|pwd)( .*)?"
   case "$FACTORY_JOB" in
     review)  allowed="${common}|git checkout --detach (FETCH_HEAD|${ref})|(\./)?scripts/factory/post-review\.sh [0-9]+ (approve|changes)" ;;
-    improve) allowed="${common}|git switch (-c )?factory/improve-[A-Za-z0-9._-]+|git add( -A)?( [^ -][^ ]*)*|git commit (-m Q|-F -)|git push -u origin factory/improve-[A-Za-z0-9._-]+|pnpm (check|lint|lint:deps|test|format)|(\./)?scripts/factory/(open-draft-pr\.sh factory/improve-[A-Za-z0-9._-]+ Q|open-issue\.sh Q)" ;;
+    improve) allowed="${common}|git switch (-c )?factory/improve-[A-Za-z0-9._-]+|git add( -A)?( [^ -][^ ]*)*|git commit (-m Q|-F -)|git push -u origin factory/improve-[A-Za-z0-9._-]+|pnpm (check|check:versions|lint|lint:deps|test|format)|(\./)?scripts/factory/(open-draft-pr\.sh factory/improve-[A-Za-z0-9._-]+ Q|open-issue\.sh Q)" ;;
     *) deny "不明な FACTORY_JOB(${FACTORY_JOB})" "review か improve を設定する" ;;
   esac
   printf '%s' "$unq" | grep -Eq -- "^(${allowed})$" \

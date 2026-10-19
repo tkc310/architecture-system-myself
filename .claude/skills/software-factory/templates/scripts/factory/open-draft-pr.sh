@@ -2,7 +2,7 @@
 # 週次の改善ジョブが、規則を強める下書き PR を作る。マージはしない。
 #
 # 使い方: scripts/factory/open-draft-pr.sh <ブランチ名> "<タイトル>" <<'EOF'
-#         (PR の説明。週次の報告を含める)
+#         (PR の説明)
 #         EOF
 #
 # ブランチ名は claude/factory-improve- で始まるものだけを受け付ける。

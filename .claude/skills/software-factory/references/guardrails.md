@@ -62,7 +62,7 @@ Claude の無人ジョブ(PR のレビュー、週次の改善)をどこで動�
 
 - 既定は「確認を求める」にし、日常の作業で使う安全なコマンドだけを許可リストに入れる。
   - 許可: 検査とテスト(`make check`、`make test` など。コマンドは `Makefile` のターゲットだけを許す)、読み取り系の Git(`git status`、`git diff`、`git log`)、ブランチ上でのコミット、`gh` の読み取り系
-  - 確認: 依存の追加と削除(`make add`、`make add-dev`、`make remove`)、部品の取り込み(`make ui-add`、`make ui-update`)、`git push`、PR の作成、生成コマンド
+  - 確認: 依存の追加と削除(`make add`、`make add-dev`、`make add-dev-exact`、`make remove`)、部品の取り込み(`make ui-add`、`make ui-update`)、`git push`、PR の作成、生成コマンド
   - 拒否: 秘密情報の読み取り(`.env*`、鍵ファイル)、破壊的なコマンド(`rm -rf`、`git push --force`、`git reset --hard`)、パッケージマネージャーの直接の実行。本番への操作と外部への送信(`curl` などでの POST)は、権限ではなく `guard-bash.sh` で拒否する
 - 拒否は許可より優先される前提で書き、許可リストを広く取りすぎない。
 

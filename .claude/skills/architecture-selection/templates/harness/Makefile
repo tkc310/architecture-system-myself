@@ -5,6 +5,12 @@
 # 値を渡すターゲット(add、remove、why、ui-add、ui-update、check-versions)は、値を make の変数としてではなく
 # 環境変数($pkg、$name、$args)として受け取り、形を確かめてから使う。値に書いたシェルのコードは実行されない。
 
+# コマンドラインの値は make に展開させない($(shell …) などを書かれても、ただの文字列として扱う)
+override pkg := $(value pkg)
+override name := $(value name)
+override args := $(value args)
+export pkg name args
+
 SHELL := bash
 .SHELLFLAGS := -euo pipefail -c
 .DEFAULT_GOAL := help
@@ -106,10 +112,10 @@ audit: ## 脆弱性の照会(Takumi Guard は取得専用なので npm の公式
 # ---- デザインシステム(B / C を選んだときだけ。make add-dev-exact pkg=shadcn で入れておく。使わないなら消す) ----
 .PHONY: ui-add ui-update
 ui-add: ## 部品を取り込む(make ui-add name="@8341/8341-base @8341/button")
-	@test -f components.json || { echo 'components.json がない(ARCHITECTURE.md の「デザインシステム」)' >&2; exit 2; }
+	@test -f components.json || { echo 'components.json がない(ARCHITECTURE.md の「技術スタック」のデザインシステムの行)' >&2; exit 2; }
 	$(call require,name,$(UI_RE),make ui-add name=@8341/button)
 	@set -f; pnpm exec shadcn add $$name
 ui-update: ## 取り込んだ部品を取り込み直す(make ui-update name="@8341/button")
-	@test -f components.json || { echo 'components.json がない(ARCHITECTURE.md の「デザインシステム」)' >&2; exit 2; }
+	@test -f components.json || { echo 'components.json がない(ARCHITECTURE.md の「技術スタック」のデザインシステムの行)' >&2; exit 2; }
 	$(call require,name,$(UI_RE),make ui-update name=@8341/button)
 	@set -f; pnpm exec shadcn add --overwrite $$name

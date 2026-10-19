@@ -92,6 +92,8 @@ fi
 if printf '%s\n' "$scan_nq" | grep -Eq -- "${cmdpos}(g?make)([[:space:]]|$)"; then
   printf '%s\n' "$scan_dq" | grep -Eq -- '(^|[[:space:]])(MAKE[A-Z_]*|GNUMAKEFLAGS)=' \
     && deny "make の動きを変える環境変数" "make <ターゲット> だけで叩く"
+  printf '%s\n' "$scan" | grep -Eq -- '(^|[[:space:];&|(])g?make[[:space:]][^;&|]*[$`]' \
+    && deny "make の引数の \$ や \`" "値は展開されない文字だけで渡す(make に \$(shell …) を展開させないため)"
   printf '%s\n' "$scan_nq" | grep -Eq -- '(^|[[:space:];&|(])g?make([[:space:]]+[^;&|)]*)?[[:space:]]-' \
     && deny "make のオプション" "make <ターゲット> だけで叩く"
   printf '%s\n' "$scan" | grep -Eq -- '(^|[[:space:];&|(])g?make[[:space:]]([^;&|)]*[[:space:]])?([A-Za-z_.][A-Za-z0-9_.]*)=' \
@@ -179,7 +181,7 @@ if [ -n "${FACTORY_JOB:-}" ]; then
   common="git (diff|log|show|status|rev-parse)( .*)?|git fetch origin ${ref}|gh api (-H Q )?Q( .*)?|gh api (-H Q )?repos/[^ ]+( .*)?|gh run (list|view)( .*)?|(cat|ls|head|tail|wc|jq|grep|date|echo|pwd)( .*)?"
   case "$FACTORY_JOB" in
     review)  allowed="${common}|(\./)?scripts/factory/post-review\.sh [0-9]+ [0-9a-f]{40} (approve|changes)" ;;
-    improve) allowed="${common}|git switch -c claude/factory-improve-[A-Za-z0-9._-]+ origin/main|git switch (main|claude/factory-improve-[A-Za-z0-9._-]+)|git add( -A)?( [^ -][^ ]*)*|git commit (-m Q|-F -)|git push -u origin claude/factory-improve-[A-Za-z0-9._-]+|make (check|check-versions|lint|lint-deps|test|format)|(\./)?scripts/factory/(open-draft-pr\.sh claude/factory-improve-[A-Za-z0-9._-]+ Q|open-issue\.sh Q)" ;;
+    improve) allowed="${common}|git switch -c claude/factory-improve-[A-Za-z0-9._-]+ origin/main|git switch main|git add( -A)?( [^ -][^ ]*)*|git commit (-m Q|-F -)|git push -u origin claude/factory-improve-[A-Za-z0-9._-]+|make (check|check-versions|lint|lint-deps|test|format)|(\./)?scripts/factory/(open-draft-pr\.sh claude/factory-improve-[A-Za-z0-9._-]+ Q|open-issue\.sh Q)" ;;
     *) deny "不明な FACTORY_JOB(${FACTORY_JOB})" "review か improve を設定する" ;;
   esac
   printf '%s' "$unq" | grep -Eq -- "^(${allowed})$" \
@@ -193,7 +195,7 @@ if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
 fi
 
 # ---- 確認: 承認が要る操作 ----
-has '(^|[[:space:];&|(])g?make[[:space:]]([^;&|]*[[:space:]])?(add|add-dev|remove|install|setup|generate|ui-add|ui-update)([[:space:]]|$)' \
+has '(^|[[:space:];&|(])g?make[[:space:]]([^;&|]*[[:space:]])?(add|add-dev|add-dev-exact|remove|install|setup|generate|ui-add|ui-update)([[:space:]]|$)' \
   && ask "依存の追加や削除、取り込みです。目的、代替、ライセンス、保守状況を確認してください。"
 has 'drizzle-kit[[:space:]]+(push|migrate)|prisma[[:space:]]+(migrate[[:space:]]+deploy|db[[:space:]]+push)|DATABASE_URL=' \
   && ask "マイグレーションの適用か、データベースへの接続先の指定です。対象の環境を確認してください。"

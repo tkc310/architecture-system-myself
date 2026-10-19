@@ -42,7 +42,7 @@ Claude Code から作る場合は、`/schedule` で週次のルーティンを�
 
 1. 小さな PR を作り、`factory-review` のルーティンが起動して、PR にコメントと `factory/review` のステータスが付くことを確かめる。
 2. ルーティンの実行記録で、フックが効いていることを確かめる(例: プロンプトに `git push --force` を試させると拒否される)。
-3. `factory-improve` を **Run now** で一度動かし、下書き PR か Issue ができることを確かめる。
+3. `factory-improve` を **Run now** で一度動かし、週次の報告の Issue ができる(候補があれば下書き PR もできる)ことを確かめる。
 
 ## 起動しなかったとき
 

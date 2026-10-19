@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# 週次の改善ジョブが、PR にできない提案(規則を緩める変更、.claude/ や .github/ の変更、既存コードの違反)や、
-# PR を作らなかった週の報告を Issue にする。ラベル factory-improve を付ける。
+# 週次の改善ジョブが、週次の報告(毎週 1 件)と、PR にできない提案(規則を緩める変更、.claude/ や .github/ の変更、
+# 既存コードの違反、版の更新)を Issue にする。ラベル factory-improve を付ける。
 #
 # 使い方: scripts/factory/open-issue.sh "<タイトル>" <<'EOF'
 #         (本文)

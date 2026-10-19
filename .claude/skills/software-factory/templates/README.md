@@ -44,6 +44,10 @@ architecture-selection のハーネスを置いた後に置く。形式(A: GitHu
    - `main` への直接の push と強制 push を禁止する
    - 迂回を許すリスト(Bypass list)を空にする(管理者も迂回できないようにする)
 
+## 既存の工場を更新するとき
+
+形式 A のレビューは、比較元(base)の版のフックと `scripts/factory/` で動く。そのため、`post-review.sh` やフックの呼び方を変える更新は、それを含む PR 自体のレビューが古い版で動いて失敗する。フックとスクリプトの更新を先にマージするか、その PR だけ人が `factory/review` を確かめてから付ける。初めて導入する PR も同じで、比較元に `scripts/factory/` がないので、人が確かめる。
+
 ## 動作の確認
 
 ```sh

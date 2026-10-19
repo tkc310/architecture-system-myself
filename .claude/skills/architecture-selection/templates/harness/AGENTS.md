@@ -7,7 +7,7 @@
 - `ARCHITECTURE.md`: 構造の段階([S / M / L])、技術スタック、モジュールの一覧
 - `docs/adr/`: 決定とその理由。ADR と矛盾する変更をするときは、先に新しい ADR を提案する
 - 作業するモジュールの `README.md` と `AGENTS.md`
-- 画面を作るとき: `DESIGN.md` と、使っているデザインシステムの DESIGN.md(ARCHITECTURE.md の「デザインシステム」に書いた場所)
+- 画面を作るとき: `DESIGN.md` と、使っているデザインシステムの DESIGN.md(ARCHITECTURE.md の「技術スタック」のデザインシステムの行に書いた場所)
 
 ## コマンド
 
@@ -24,7 +24,7 @@
 | テスト | `make test` |
 | E2E(手動) | `make test-e2e` |
 | 生成コードの更新(スキーマや契約を変えた後) | `make generate` |
-| 依存の追加と削除(承認が要る) | `make add pkg="<名前>"` / `make add-dev pkg="<名前>"` / `make remove pkg="<名前>"` |
+| 依存の追加と削除(承認が要る) | `make add pkg="<名前>"` / `make add-dev pkg="<名前>"` / `make add-dev-exact pkg="<名前>"` / `make remove pkg="<名前>"` |
 | 版の鮮度 | `make check-versions` |
 | デザインシステムの部品の取り込み(承認が要る。使うときだけ) | `make ui-add name="<名前>"` / `make ui-update name="<名前>"` |
 

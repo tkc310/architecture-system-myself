@@ -1,5 +1,5 @@
 {
-  "//": "package.json の scripts と devDependencies に統合し、このファイルは置かない。版は導入時に公式の情報で確かめ、oxfmt は exact で固定する(pnpm add -D -E oxfmt)。",
+  "//": "package.json の scripts と devDependencies に統合し、このファイルは置かない。devDependencies は導入時に pnpm add -D で最新の安定版を入れ、check:versions で確かめる。oxfmt は exact で固定する(pnpm add -D -E oxfmt)。packageManager(例: \"pnpm@<版>\")も package.json に書く(pnpm/action-setup がこの版を使う)。",
   "scripts": {
     "format": "oxfmt",
     "format:check": "oxfmt --check",
@@ -13,7 +13,8 @@
     "generate": "echo \"生成コマンド(openapi-typescript、drizzle-kit など)をここに書く\"",
     "generate:check": "pnpm generate && git diff --exit-code -- src/generated",
     "build": "echo \"ビルドコマンドをここに書く\"",
-    "check": "pnpm format:check && pnpm lint && pnpm lint:deps && pnpm typecheck && pnpm test"
+    "check": "pnpm format:check && pnpm lint && pnpm lint:deps && pnpm typecheck && pnpm test",
+    "check:versions": "node scripts/check-versions.mjs"
   },
   "devDependencies": [
     "typescript",

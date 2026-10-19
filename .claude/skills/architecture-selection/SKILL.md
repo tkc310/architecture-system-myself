@@ -32,7 +32,7 @@ ARCHITECTURE.md には採った値と外した理由だけを書き、ルール�
 3. **技術スタック**(`references/tech-selection.md`)。既定から外れる項目を決める。採用するライブラリは、公式ドキュメントで現行のリリースと導入手順を確認してから書く。記憶で版や設定を書かない。依存は `make add pkg="<名前>"`(中身は `pnpm add`)で最新の安定版を入れ、プレリリース(`-rc`、`-beta`、`canary` など)を選ばない。依存を入れる前に、ハーネスの `.npmrc`(Takumi Guard)と `pnpm-workspace.yaml`(`trustPolicy: no-downgrade`)を置く(`references/security.md` の「依存の供給網」)。
 4. **性能**(`references/performance-ladder.md`)。性能の要件があるときだけ、必要な段階を決める。段階 4(WebAssembly)と 5(Go)は、ユーザーに確認してから採る。
 5. **デザインシステム**(`references/design-system.md`)。画面があるときだけ、8341-ui を使わない / 使う / 作る、から選ぶ。作る場合は、新しいリポジトリを作る前にユーザーの承認を得る。使う・作る場合は、部品を取り込み、DESIGN.md を置く。
-6. **構造と CQS**(`references/principles.md`、`references/cqs.md`)。採った段階のディレクトリを作り、モジュール(S では feature)の一覧と所有するテーブルを決める。
+6. **構造と CQS**(`references/principles.md`、`references/cqs.md`)。採った段階のディレクトリを作り、モジュール(S では feature)の一覧と所有するテーブルを決める。画面があれば、`ui/` は `references/component-structure.md` に従う。
 7. **ハーネス**(`references/quality-gates.md`、`references/testing-strategy.md`、`references/editing-constraints.md`)。`templates/harness/README.md` の手順で雛形を置く。コマンドはすべて `Makefile` のターゲットにし、人もエージェントも CI も `make` で叩く(`references/coding-conventions.md` の「コマンドは make で叩く」)。
 8. **ADR と ARCHITECTURE.md**。ADR は最低限、次の 2 本を書く。段階 3 以上の性能対策、Go の採用、デザインシステムの選択(画面があるとき)、既定のスタックからの逸脱は、それぞれ別の ADR にする。
    - `0001-structure-tier.md`(構造の段階と、昇格・降格の条件)

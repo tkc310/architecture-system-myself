@@ -10,6 +10,7 @@
 | 読み取り | `queries/get-<noun>.query.ts`(L では `application/queries/`) |
 | 共通の計算・ルール | `services/<noun>.service.ts`(L では `domain/`) |
 | テーブル定義 | `tables.ts`(L では `infrastructure/tables.ts`) |
+| 画面と部品 | `ui/<Component>/index.tsx`(PascalCase のディレクトリ。子は親のディレクトリの中) |
 
 ## 用語集
 

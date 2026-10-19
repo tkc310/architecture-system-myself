@@ -129,6 +129,7 @@ cp -r .claude/skills/architecture-selection .claude/skills/software-factory <対
 │   ├── performance-ladder.md   # 性能対策の段階
 │   ├── design-system.md        # デザインシステムの選択(8341-ui を使わない / 使う / 作る)
 │   ├── principles.md           # 段階別の構造と依存ルール
+│   ├── component-structure.md  # 画面のコンポーネントの置き場所、名前、入れ子、import
 │   ├── cqs.md                  # コマンドとクエリ
 │   ├── quality-gates.md        # 機械に保証させる項目と CI
 │   ├── testing-strategy.md

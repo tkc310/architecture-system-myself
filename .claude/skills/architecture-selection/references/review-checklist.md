@@ -22,6 +22,7 @@
 
 ## 構造とハーネス
 - [ ] ディレクトリ構成と `.dependency-cruiser.cjs` の段階が一致している
+- [ ] 画面があるとき、`ui/` が [コンポーネントの構造](./component-structure.md) に沿っている(PascalCase のディレクトリ、`index.tsx`、親子の入れ子、`shared/ui/` と `shared/ui/ds/` の分け方)
 - [ ] 各モジュール(S では feature)に `README.md` がある。M と L では加えて `AGENTS.md` と、所有するテーブルの一覧がある
 - [ ] 空の雛形で `make check` が通る
 - [ ] 境界違反のファイルを置くと `make lint-deps` が失敗する(確認後に削除した)

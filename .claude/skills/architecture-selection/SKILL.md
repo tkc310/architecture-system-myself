@@ -1,6 +1,6 @@
 ---
 name: architecture-selection
-description: 新規サービスのアーキテクチャと技術スタックを選定し、ARCHITECTURE.md・ディレクトリ構成・ハーネス雛形(型/lint/依存ルール/テスト/フック)・ADRを出力する。既存の ARCHITECTURE.md の調整や、コードベースの構造レビューにも使う。フルスタックTypeScriptを既定とし、構造を規模でS/M/Lの3段階から選び、性能要件があるときだけ Effect / Worker / WebAssembly / Go の順に検討する。Use when choosing architecture or tech stack, scaffolding a codebase for AI-driven development, or reviewing a codebase's structure.
+description: 新規サービスのアーキテクチャと技術スタックを選定し、ARCHITECTURE.md・ディレクトリ構成・ハーネス雛形(型/lint/依存ルール/テスト/フック)・ADRを出力する。既存の ARCHITECTURE.md の調整や、コードベースの構造レビューにも使う。フルスタックTypeScriptを既定とし、構造を規模でS/M/Lの3段階から選び、性能要件があるときだけ Effect / Worker / WebAssembly / Go の順に検討する。画面があるときはデザインシステムを 8341-ui を使わない / 使う / 作る から選ぶ。Use when choosing architecture or tech stack, scaffolding a codebase for AI-driven development, or reviewing a codebase's structure.
 ---
 
 # アーキテクチャ選定スキル
@@ -13,6 +13,7 @@ description: 新規サービスのアーキテクチャと技術スタックを�
 | --- | --- | --- |
 | 技術スタック、アーキテクチャ、ディレクトリ構成の要約 | `ARCHITECTURE.md` | `templates/ARCHITECTURE.md` |
 | 決定とその理由 | `docs/adr/NNNN-<title>.md` | `templates/adr.md` |
+| 画面の設計の前提(デザインシステムを使うとき) | `DESIGN.md` | 8341-ui の `templates/PRODUCT-DESIGN.md` |
 | ディレクトリ構成 | 実ディレクトリ（空のものは `.gitkeep`）と各モジュールの `README.md`・`AGENTS.md` | `references/principles.md`、`templates/module-AGENTS.md` |
 | ハーネス | リポジトリ直下の設定ファイル群 | `templates/harness/` |
 
@@ -30,12 +31,13 @@ ARCHITECTURE.md には採った値と外した理由だけを書き、ルール�
 2. **構造の段階**（`references/scale-selection.md`）。S / M / L を判定する。境界上でどちらも同程度に妥当なときは、ユーザーに確認する。
 3. **技術スタック**（`references/tech-selection.md`）。既定から外れる項目を決める。採用するライブラリは、公式ドキュメントで現行のリリースと導入手順を確認してから書く。記憶で版や設定を書かない。
 4. **性能**（`references/performance-ladder.md`）。性能の要件があるときだけ、必要な段階を決める。段階 4（WebAssembly）と 5（Go）は、ユーザーに確認してから採る。
-5. **構造と CQS**（`references/principles.md`、`references/cqs.md`）。採った段階のディレクトリを作り、モジュール（S では feature）の一覧と所有するテーブルを決める。
-6. **ハーネス**（`references/quality-gates.md`、`references/testing-strategy.md`、`references/editing-constraints.md`）。`templates/harness/README.md` の手順で雛形を置く。
-7. **ADR と ARCHITECTURE.md**。ADR は最低限、次の 2 本を書く。段階 3 以上の性能対策、Go の採用、既定のスタックからの逸脱は、それぞれ別の ADR にする。
+5. **デザインシステム**（`references/design-system.md`）。画面があるときだけ、8341-ui を使わない / 使う / 作る、から選ぶ。作る場合は、新しいリポジトリを作る前にユーザーの承認を得る。使う・作る場合は、部品を取り込み、DESIGN.md を置く。
+6. **構造と CQS**（`references/principles.md`、`references/cqs.md`）。採った段階のディレクトリを作り、モジュール（S では feature）の一覧と所有するテーブルを決める。
+7. **ハーネス**（`references/quality-gates.md`、`references/testing-strategy.md`、`references/editing-constraints.md`）。`templates/harness/README.md` の手順で雛形を置く。
+8. **ADR と ARCHITECTURE.md**。ADR は最低限、次の 2 本を書く。段階 3 以上の性能対策、Go の採用、デザインシステムの選択(画面があるとき)、既定のスタックからの逸脱は、それぞれ別の ADR にする。
    - `0001-structure-tier.md`（構造の段階と、昇格・降格の条件）
    - `0002-tech-stack.md`（技術スタックと、既定から外した理由）
-8. **検証**。依存を入れたら `pnpm check` を実行し、空の雛形で通ることを確かめる。境界違反のファイルを一時的に置き、`pnpm lint:deps` が失敗することも確かめてから消す。最後に `references/review-checklist.md` で点検する。
+9. **検証**。依存を入れたら `pnpm check` を実行し、空の雛形で通ることを確かめる。境界違反のファイルを一時的に置き、`pnpm lint:deps` が失敗することも確かめてから消す。最後に `references/review-checklist.md` で点検する。
 
 ### モード 2: 既存の ARCHITECTURE.md を調整する
 
@@ -69,4 +71,4 @@ ARCHITECTURE.md には採った値と外した理由だけを書き、ルール�
 ## フィードバック
 
 - 対象リポジトリでの指摘は、`docs/feedback/LESSONS.md` に記録し、同じ指摘が 2 回出たら機械的なルール（型、依存ルール、lint、テスト、フック）に昇格させる。
-- このスキル自体のルールに、ギャップ、曖昧なルール、合わなかったルール、繰り返される例外が見つかったら、ユーザーに伝え、`FEEDBACK.md` に記録し、このスキルの正本リポジトリ（`tkc310/architecture-system-myself`）への具体的な編集案を示す。編集は、ユーザーの承認を得てから PR で行う。サービス固有の例外は、共有のルールではなく、そのサービスの ARCHITECTURE.md に書く。
+- このスキル自体のルールに、ギャップ、曖昧なルール、合わなかったルール、繰り返される例外が見つかったら、ユーザーに伝え、`FEEDBACK.md` に記録し、このスキルの正本リポジトリ（`tkc310/system-factory`）への具体的な編集案を示す。編集は、ユーザーの承認を得てから PR で行う。サービス固有の例外は、共有のルールではなく、そのサービスの ARCHITECTURE.md に書く。

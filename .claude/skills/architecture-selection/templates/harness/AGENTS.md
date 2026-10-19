@@ -7,6 +7,7 @@
 - `ARCHITECTURE.md`: 構造の段階([S / M / L])、技術スタック、モジュールの一覧
 - `docs/adr/`: 決定とその理由。ADR と矛盾する変更をするときは、先に新しい ADR を提案する
 - 作業するモジュールの `README.md` と `AGENTS.md`
+- 画面を作るとき: `DESIGN.md` と、使っているデザインシステムの DESIGN.md(ARCHITECTURE.md の「デザインシステム」に書いた場所)
 
 ## コマンド
 

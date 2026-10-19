@@ -15,6 +15,7 @@
 | `lefthook.yml` | リポジトリ直下 | `pnpm exec lefthook install` |
 | `.github/workflows/ci.yml` | 同じパス | 6 つのステージをブランチ保護の必須チェックに指定する |
 | `.github/CODEOWNERS` | 同じパス | 担当者を埋め、ブランチ保護で「コードオーナーのレビューを必須にする」を有効にする |
+| `pnpm-workspace.yaml`、`.npmrc` | リポジトリ直下 | 依存の供給網の対策(`trustPolicy: no-downgrade` と Takumi Guard)。そのまま置く。モノレポなら `pnpm-workspace.yaml` に `packages` を足す。どちらにもトークンを書かない([セキュリティ](../../references/security.md#依存の供給網)) |
 | `scripts/guard-paths.sh`、`scripts/check-edited-file.sh` | 同じパス | `chmod +x`。どちらも `jq` を使う |
 | `scripts/check-versions.mjs` | 同じパス | 依存、Node.js、GitHub Actions、デザインシステムのレジストリが最新の安定版かを調べる。`pnpm check:versions` で実行する(下の「版の確認」) |
 | `.claude/settings.json` | 同じパス | Claude Code を使う場合。保護パスの拒否と、編集後の検査 |
@@ -33,7 +34,7 @@ pnpm check:versions   # node scripts/check-versions.mjs
 
 | 調べるもの | 比べる相手 |
 | --- | --- |
-| `package.json`(と `packages/*`、`apps/*`、pnpm の catalog)の依存 | npm の `latest`(安定版)。指定がプレリリース(`-rc` など)なら知らせる |
+| `package.json`(と `packages/*`、`apps/*`、pnpm の catalog)の依存と `packageManager` | npm の `latest`(安定版)。指定がプレリリース(`-rc` など)なら知らせる |
 | Node.js(`.tool-versions`、`.nvmrc`、`engines`) | 最新の LTS |
 | `.github/workflows/*.yml` の `uses: owner/repo@vN` | 各 Action の最新のリリースの major |
 | `components.json` の GitHub Pages のレジストリ(8341-ui など) | そのリポジトリの最新のリリース。URL に版(`/r/v<版>/`)がなければ知らせる |
@@ -51,7 +52,8 @@ pnpm check:versions   # node scripts/check-versions.mjs
    - S: `src/app/` から `src/features/<f>/queries/` を直接 import する
    - M: あるモジュールの query から、別のモジュールの `tables.ts` を import する
    - L: `domain/` から `drizzle-orm` か `node:fs` を import する
-3. `echo '{"tool_input":{"file_path":"db/migrations/0001.sql"}}' | scripts/guard-paths.sh` が終了コード 2 で終わる。
+3. `echo '{"tool_input":{"file_path":"db/migrations/0001.sql"}}' | scripts/guard-paths.sh` が終了コード 2 で終わる。`.npmrc` と `pnpm-workspace.yaml` でも同じく 2 で終わる。
+4. `pnpm config get registry` が `https://npm.flatt.tech/` を返す。依存に加えない作業用のディレクトリで `@panda-guard/test-malicious` の取得が 403 になる。
 
 ## 段階を変えたとき
 

@@ -43,6 +43,7 @@
       "Read(**/*.pem)",
       "Read(**/*.key)",
       "Read(**/id_rsa*)",
+      "Read(~/.npmrc)",
       "Edit(.env)",
       "Edit(.env.*)",
       "Bash(rm -rf *)",

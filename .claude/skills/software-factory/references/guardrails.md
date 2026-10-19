@@ -72,7 +72,7 @@ Claude の無人ジョブ(PR のレビュー、週次の改善)をどこで動�
 
 **必須**
 
-- 次を含むコマンドを拒否する: 再帰的な削除(`rm -rf`)、強制プッシュ、`main` への直接プッシュとコミット、作業内容を捨てる操作(`reset --hard`、`clean -f`)、Git のフックの回避と無効化(上の節)、PR のマージ、`gh api` での書き込み、秘密情報ファイルの読み出し、パイプでのシェル実行(`curl ... | sh`)、外部への送信、本番環境への操作。
+- 次を含むコマンドを拒否する: 再帰的な削除(`rm -rf`)、強制プッシュ、`main` への直接プッシュとコミット、作業内容を捨てる操作(`reset --hard`、`clean -f`)、Git のフックの回避と無効化(上の節)、PR のマージ、`gh api` での書き込み、秘密情報ファイル(利用者の `~/.npmrc` を含む)の読み出し、依存の取得元や供給網の検査の上書き(`--registry`、`pnpm config set`、`npm_config_*`、`--config.*`、`.npmrc` と `pnpm-workspace.yaml` へのシェルからの書き込み)、パイプでのシェル実行(`curl ... | sh`)、外部への送信、本番環境への操作。
 - 拒否したときは、理由と代わりの手順を stderr に返す。
 
 ## 完了前の検査(層 3)
@@ -105,5 +105,6 @@ Issue、PR の説明、レビューコメント、依存パッケージの READM
 
 **必須**
 
-- 依存の追加は権限で「確認」にし、`package.json` とロックファイルを保護パスにする。
+- 依存の追加は権限で「確認」にし、`package.json`、ロックファイル、`.npmrc`、`pnpm-workspace.yaml` を保護パスにする。
+- 取得元は Takumi Guard、`trustPolicy` は `no-downgrade` にする(architecture-selection の `references/security.md` の「依存の供給網」)。エージェントはこれを外さない。止まった版を外す(`trustPolicyExclude`)のは人が ADR を書いて行う。
 - 追加するときは、PR の説明に、目的、代わりに検討したもの、ライセンス、保守状況を書く。

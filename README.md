@@ -6,6 +6,7 @@ AI 駆動開発で使い回すための、設計と開発工程のボイラー�
 - 構造は、開発人数・業務領域の数・業務ルールの複雑さで S / M / L の 3 段階から選ぶ。シンプルな CRUD にドメイン層もリポジトリ層も作らない
 - 画面があるときは、デザインシステムを「[8341-ui](https://github.com/tkc310/8341ui) を使わない / 使う / 8341-ui をひな形に作る」から選ぶ
 - 境界は文章ではなく、型・oxlint・dependency-cruiser・テスト・フックで機械的に守る
+- 依存の供給網は、既定で pnpm の `trustPolicy: no-downgrade` と [Takumi Guard](https://shisho.dev/docs/t/guard/quickstart/npm/) のレジストリで守る
 - 指摘を記録し、繰り返すものを機械的なルールに昇格させて自己改善する
 
 ## 使い方

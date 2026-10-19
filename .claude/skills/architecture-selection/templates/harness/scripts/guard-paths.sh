@@ -64,7 +64,7 @@ fi
 case "$rel" in
   db/migrations/*|src/shared/auth/*|src/generated/*|\
   infra/*|.github/*|Dockerfile|.env|.env.*|\
-  package.json|pnpm-lock.yaml|package-lock.json|yarn.lock|\
+  package.json|pnpm-lock.yaml|package-lock.json|yarn.lock|.npmrc|pnpm-workspace.yaml|\
   .cursor/*|.claude/*|scripts/guard-paths.sh|scripts/check-edited-file.sh|lefthook.yml|\
   .dependency-cruiser.cjs|.oxlintrc.json|CODEOWNERS|AGENTS.md|CLAUDE.md|docs/factory/*|scripts/factory/*|.git/*)
     printf '%s は保護パスです。編集する前にユーザーの明示的な許可を得てください(references/editing-constraints.md)。生成コードは生成元を直してください。\n' "$rel" >&2

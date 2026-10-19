@@ -5,6 +5,7 @@
 //   1. package.json の dependencies / devDependencies / peerDependencies(workspace: catalog: file: link: git などは除く)
 //      - npm の dist-tags.latest(安定版)と比べる。指定がプレリリース(-alpha、-beta、-rc など)なら知らせる
 //      - pnpm-workspace.yaml の catalog があれば、その版も調べる
+//      - package.json の packageManager(pnpm@<版>)も調べる。書いていなければ知らせる
 //   2. Node.js: .tool-versions / .nvmrc / .node-version / package.json の engines と、最新の LTS を比べる
 //   3. GitHub Actions: .github/workflows/*.yml の uses: owner/repo@vN と、最新のリリースの major を比べる
 //   4. shadcn のレジストリ: components.json の registries のうち GitHub Pages(<owner>.github.io/<repo>)のもの
@@ -91,6 +92,10 @@ function collectDeps() {
     if (/^(workspace:|catalog:|file:|link:|git|github:|https?:|npm:)/.test(spec)) return;
     if (!deps.has(name)) deps.set(name, { spec, where });
   };
+  // packageManager(例: pnpm@10.21.0+sha512.…)。+ 以降のハッシュは版の比較に使わない
+  const rootPkg = readJson(join(root, 'package.json'));
+  const pm = typeof rootPkg?.packageManager === 'string' && rootPkg.packageManager.match(/^(pnpm|npm|yarn)@([^+]+)/);
+  if (pm) put(pm[1], pm[2], 'package.json の packageManager');
   const files = ['package.json'];
   for (const dir of ['packages', 'apps']) {
     if (!existsSync(join(root, dir))) continue;
@@ -119,6 +124,8 @@ function collectDeps() {
 
 async function checkNpm() {
   const deps = collectDeps();
+  const pkg = readJson(join(root, 'package.json'));
+  if (pkg && !pkg.packageManager) add('npm', 'packageManager', '(指定なし)', '?', 'missing', 'package.json に "packageManager": "pnpm@<版>" を書く(pnpm の版を CI と手元でそろえる)');
   const entries = [...deps.entries()];
   const limit = 8;
   for (let i = 0; i < entries.length; i += limit) {

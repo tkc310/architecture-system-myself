@@ -19,6 +19,11 @@ jobs:
         with:
           node-version: lts/*
           cache: pnpm
+      # インストールの前に、依存の供給網の設定が外されていないことを確かめる(references/security.md)
+      - name: 依存の供給網の設定
+        run: |
+          grep -Eq '^registry=https://npm\.flatt\.tech/?$' .npmrc || { echo '.npmrc の registry が Takumi Guard ではない'; exit 1; }
+          grep -Eq '^trustPolicy:[[:space:]]*no-downgrade[[:space:]]*$' pnpm-workspace.yaml || { echo 'pnpm-workspace.yaml に trustPolicy: no-downgrade がない'; exit 1; }
       - run: pnpm install --frozen-lockfile
 
       - name: 1. フォーマットの確認
@@ -46,4 +51,5 @@ jobs:
         with:
           node-version: lts/*
           cache: pnpm
-      - run: pnpm audit --prod
+      # Takumi Guard は取得専用のプロキシなので、脆弱性の照会は npm の公式のレジストリに行う
+      - run: pnpm audit --prod --registry=https://registry.npmjs.org/

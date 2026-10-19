@@ -1,6 +1,6 @@
-# 品質ゲートの必須ステージ(references/quality-gates.md)。すべてをブランチ保護の必須チェックに指定する。
-# E2E と VRT は実行コストが高いので CI に含めず、手元で make test-e2e を実行する(references/testing-strategy.md)。
-# 手元と同じく、コマンドはすべて Makefile のターゲットで叩く(references/coding-conventions.md)。
+# 品質ゲートの必須ステージ(ARCHITECTURE.md の「品質ゲート」)。ジョブ check をブランチ保護の必須チェックに指定する。
+# E2E と VRT は実行コストが高いので CI に含めず、手元で実行する(make test-e2e など)。
+# 手元と同じく、コマンドはすべて Makefile のターゲットで叩く。
 name: ci
 
 on:
@@ -10,6 +10,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -18,9 +21,9 @@ jobs:
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
-          node-version: lts/*
+          node-version-file: .node-version
           cache: pnpm
-      # make install は、インストールの前に依存の供給網の設定(make check-supply-chain)を確かめる(references/security.md)
+      # make install は、インストールの前に依存の供給網の設定(make check-supply-chain)を確かめる
       - run: make install
 
       - name: 1. フォーマットの確認
@@ -39,14 +42,13 @@ jobs:
         run: make build
 
   audit:
-    # 推奨: 依存パッケージの脆弱性検査
+    # 推奨: 依存パッケージの脆弱性検査(依存を入れないので、pnpm のキャッシュは使わない)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
-          node-version: lts/*
-          cache: pnpm
+          node-version-file: .node-version
       # Takumi Guard は取得専用のプロキシなので、脆弱性の照会は npm の公式のレジストリに行う(Makefile の audit)
       - run: make audit

@@ -44,12 +44,14 @@ mkdir -p "$out_dir"
 out="${out_dir}/${sha}.md"
 
 echo "[factory] push の前に独立レビューを行います(${sha:0:7})..." >&2
-claude -p "あなたは .claude/agents/reviewer.md の reviewer です。そのファイルを読み、指示に従ってください。
+# FACTORY_LOCAL_REVIEW: Stop フック(require-check-on-stop.sh)にレビューを止めさせない。
+# < /dev/null: lefthook が標準入力で渡す ref の一覧を、プロンプトとして読ませない。
+FACTORY_LOCAL_REVIEW=1 claude -p "あなたは .claude/agents/reviewer.md の reviewer です。そのファイルを読み、指示に従ってください。
 ${spec_line}
 差分は git diff ${base_ref}...HEAD で取ってください。ファイルは編集しません。
 出力は reviewer.md の出力形式だけにしてください。" \
   --allowedTools "Read,Grep,Glob,Bash(git diff *),Bash(git log *),Bash(git show *)" \
-  --output-format text > "$out" 2>&1
+  --output-format text < /dev/null > "$out" 2>&1
 status=$?
 
 cat "$out" >&2

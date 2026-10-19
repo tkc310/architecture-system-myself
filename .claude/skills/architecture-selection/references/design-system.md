@@ -5,7 +5,7 @@
 | 選択 | 内容 | 向いている案件 |
 | --- | --- | --- |
 | A. 8341-ui を使わない | デザインシステムを導入しない。組織の既存のデザインシステムがあればそれを使う | 組織の標準がある、画面がごく少ない、React 以外の画面 |
-| B. 8341-ui を使う | [8341-ui](https://github.com/tkc310/8341ui) のトークンとコンポーネントを shadcn のレジストリで取り込む | 新規のサービスで、アクセシビリティを担保した部品を早くそろえたい |
+| B. 8341-ui を使う | [8341-ui](https://github.com/tkc310/8341-ui) のトークンとコンポーネントを shadcn のレジストリで取り込む | 新規のサービスで、アクセシビリティを担保した部品を早くそろえたい |
 | C. デザインシステムを作る | 8341-ui をひな形に、サービス(または組織)専用のデザインシステムのリポジトリを作り、B と同じ方法で取り込む | ブランドのキーカラーや見た目の性格が決まっている。複数のプロダクトで共有する基盤を作りたい |
 
 8341-ui は、[デジタル庁デザインシステム(DADS)](https://design.digital.go.jp/dads/) のアクセシビリティ基準(WCAG 2.2 AA)を土台にしたデザインシステムで、トークン(W3C DTCG)、Base UI + Tailwind CSS v4 のコンポーネント、Storybook、画面設計のルール(design-principles)を持つ。
@@ -34,13 +34,13 @@
 
 ### 取り込み方
 
-部品のコードをプロジェクトに取り込む shadcn 方式を使う。8341-ui は npm にも公開できる(任意)が、部品のコードを取り込む shadcn 方式を正とする。
+部品のコードをプロジェクトに取り込む shadcn 方式を使う(8341-ui は npm にも公開できるが、使わない)。
 
-1. 8341-ui の [GitHub Releases](https://github.com/tkc310/8341ui/releases) で最新の版(タグ `8341-ui@<版>`)を確かめ、その版を固定したレジストリを `components.json` に登録する。版は記憶で書かない。
+1. 8341-ui の [GitHub Releases](https://github.com/tkc310/8341-ui/releases) で最新の版(タグ `8341-ui@<版>`)を確かめ、その版を固定したレジストリを `components.json` に登録する。版は記憶で書かない。
 
    ```json
    {
-     "registries": { "@8341": "https://tkc310.github.io/8341ui/r/v<版>/{name}.json" }
+     "registries": { "@8341": "https://tkc310.github.io/8341-ui/r/v<版>/{name}.json" }
    }
    ```
 
@@ -49,7 +49,7 @@
 
 2. 土台と、使う部品を取り込む。
 
-   shadcn の CLI は `make add-dev pkg=shadcn` で開発用の依存に入れ(版を固定し、`make check-versions` で鮮度を見るため)、`make ui-add` で取り込む。
+   shadcn の CLI は `make add-dev-exact pkg=shadcn` で版を固定して開発用の依存に入れ(`make check-versions` で鮮度を見られる)、`make ui-add` で取り込む。
 
    ```bash
    make ui-add name="@8341/8341-base @8341/button @8341/form-field @8341/text-field"
@@ -64,22 +64,16 @@
 
 4. テーマの切り替えは `<html class="dark">` か `<html data-theme="dark">` で行う。どちらもなければ OS の設定に従う。
 
-レジストリの URL と部品の一覧は、導入時に 8341-ui の README と `packages/ui/registry.json` で確かめる。記憶で書かない。
+部品の一覧は、導入時に 8341-ui の README と `packages/ui/registry.json` で確かめる。
 
 ### 置き場所と構造
 
-- 取り込んだ部品は、プロジェクトの共有の UI として置く。構造の段階ごとの置き場所は次のとおり。
-
-| 段階 | 置き場所 |
-| --- | --- |
-| S | `src/shared/ui/`(feature の `ui/` から import する) |
-| M、L | `src/shared/ui/`(モジュールの `ui/` から import する) |
-
-- `components.json` の `aliases.ui` を上の置き場所に、`aliases.lib` を `src/shared/lib/` に合わせる(8341-ui の `tv` などの共通処理が入る)。
+- 取り込んだ部品は、段階によらず共有の UI として `src/shared/ui/` に置き、feature やモジュールの `ui/` から import する。
+- `components.json` の `aliases.ui` を `src/shared/ui/` に、`aliases.lib` を `src/shared/lib/` に合わせる(8341-ui の `tv` などの共通処理が入る)。
 - 取り込んだ部品のファイルは手で書き換えない。直したいときは、8341-ui に Issue を出すか、プロジェクト側で包む部品を作る。
 - 部品を更新するときは、8341-ui の CHANGELOG(Releases の本文)で利用側の修正が要る変更(0.x では minor)を確かめ、`components.json` の URL の版を上げて、取り込んだ部品をすべて `make ui-update name="@8341/<name> …"` で取り込み直す。版を ARCHITECTURE.md にも書く。
   - 理由: 手で書き換えると、取り込み直したときに変更が消え、8341-ui の検証(アクセシビリティ、コントラスト)からも外れる。
-- `src/shared/ui/` の 8341-ui の部品は、[編集制約](./editing-constraints.md) の保護パスに加える。
+- `src/shared/ui/` を保護パスに加える。`scripts/guard-paths.sh` の case と `.github/CODEOWNERS` に足し、ARCHITECTURE.md の編集制約に書く([編集制約](./editing-constraints.md#保護パス))。
 
 ### DESIGN.md
 
@@ -101,8 +95,8 @@
 
 1. ユーザーの承認を得る(新しいリポジトリを作るため)。
 2. 8341-ui を手元に複製し、そのリポジトリで Claude Code を開いて `/ds-factory` を実行する。手順は 8341-ui の `docs/factory.md` と `.claude/skills/ds-factory/SKILL.md` に従う。ヒアリングで、名前、接頭辞、キーカラー、位置づけ(共有の基盤か専用か)などを決める。
-3. 生成したデザインシステムのリポジトリで `mise install`(`.tool-versions` の道具を入れる)、`pnpm check && pnpm test` を通し、GitHub に公開して、レジストリ(GitHub Pages)を配信する。
-4. 最初の版をリリースする(`pnpm release:version` の PR をマージしてから `pnpm release:publish`。手順はそのリポジトリの `docs/releasing.md`)。これで版を固定したレジストリ `r/v<版>/` と GitHub Releases ができる。リリースは、権限のある人が手元で行う。
+3. 生成したデザインシステムのリポジトリで、その AGENTS.md の手順で道具を入れて検査を通し、GitHub に公開して、レジストリ(GitHub Pages)を配信する。
+4. 最初の版をリリースする。手順はそのリポジトリの `docs/releasing.md` にあり、権限のある人が手元で行う。これで版を固定したレジストリ `r/v<版>/` と GitHub Releases ができる。
 5. このサービスでは、B と同じ方法で、版を固定して取り込む。レジストリの名前空間と URL は、生成したものに置き換える(例: `@acme`、`https://<owner>.github.io/<リポジトリ名>/r/v<版>/{name}.json`)。
 6. 作ったデザインシステムのリポジトリ名、レジストリの URL、接頭辞を ARCHITECTURE.md と ADR に書く。
 

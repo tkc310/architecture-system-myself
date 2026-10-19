@@ -4,11 +4,13 @@
 set -uo pipefail
 
 input=$(cat)
+# push の前の独立レビュー(local-review.sh)の中では止めない。レビューは編集できないので、止めても直せない
+[ -n "${FACTORY_LOCAL_REVIEW:-}" ] && exit 0
 root="${CLAUDE_PROJECT_DIR:-$PWD}"
 cd "$root" || exit 0
 
 # コードの変更がなければ何もしない
-changed=$(git status --porcelain --untracked-files=all 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|mts|cts|json)$' || true)
+changed=$(git status --porcelain --untracked-files=all 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|mts|cts|mjs|cjs|json|jsonc|css)$' || true)
 [ -z "$changed" ] && exit 0
 
 session=$(printf '%s' "$input" | jq -r '.session_id // "unknown"' 2>/dev/null)

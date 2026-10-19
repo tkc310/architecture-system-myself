@@ -1,9 +1,15 @@
-# プロジェクトのコマンドの入口(references/coding-conventions.md の「コマンドは make で叩く」)。保護パス。
-# 人もエージェントも CI も、pnpm や各ツールを直接叩かず、ここのターゲットを使う。
-# package.json の scripts は実装の詳細。ターゲットを足すときは、ここと AGENTS.md のコマンド表を一緒に更新する。
+# プロジェクトのコマンドの入口(architecture-selection スキルの references/coding-conventions.md)。保護パス(ARCHITECTURE.md の「編集制約」)。
+# 人もエージェントも CI も、pnpm や各ツールを直接叩かず、ここのターゲットを使う。package.json の scripts は実装の詳細。
+# よく使うターゲットは、AGENTS.md のコマンドの表にも書く。
 #
-# 値を渡すターゲット(add、remove、why、ui-add、ui-update)は、値を make の変数としてではなく
-# 環境変数($$pkg、$$name)として受け取り、形を確かめてから使う。値に書いたシェルのコードは実行されない。
+# 値を渡すターゲット(add、remove、why、ui-add、ui-update、check-versions)は、値を make の変数としてではなく
+# 環境変数($pkg、$name、$args)として受け取り、形を確かめてから使う。値に書いたシェルのコードは実行されない。
+
+# コマンドラインの値は make に展開させない($(shell …) などを書かれても、ただの文字列として扱う)
+override pkg := $(value pkg)
+override name := $(value name)
+override args := $(value args)
+export pkg name args
 
 SHELL := bash
 .SHELLFLAGS := -euo pipefail -c
@@ -11,8 +17,10 @@ SHELL := bash
 MAKEFLAGS += --no-builtin-rules --no-print-directory
 
 # 依存の名前(scope と版の指定を許す)と、shadcn のレジストリの部品の名前
-PKG_RE := ^(@[a-z0-9._~-]+/)?[a-z0-9._~-]+(@[0-9A-Za-z.^~*<>=+-]+)?$$
-UI_RE := ^(@[a-z0-9-]+/)?[a-z0-9-]+$$
+# 先頭の - を許さない(--global などのオプションを名前として渡せないようにする)
+PKG_RE := ^(@[a-z0-9][a-z0-9._~-]*/)?[a-z0-9][a-z0-9._~-]*(@[0-9A-Za-z.^~*<>=+-]+)?$$
+UI_RE := ^(@[a-z0-9][a-z0-9-]*/)?[a-z0-9][a-z0-9-]*$$
+VERSIONS_ARGS_RE := ^--(json|no-node|no-actions|no-registries)$$
 
 # $(call require,<変数名>,<正規表現>,<例>)
 define require
@@ -22,11 +30,11 @@ endef
 
 .PHONY: help
 help: ## ターゲットの一覧
-	@grep -hE '^[a-z][a-z0-9-]*:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{ printf "  make %-16s %s\n", $$1, $$2 }'
+	@grep -hE '^[a-z][a-z0-9-]*:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{ printf "  make %-20s %s\n", $$1, $$2 }'
 
 # ---- 準備 ----
 .PHONY: setup install hooks doctor
-setup: check-supply-chain install hooks ## 初回の準備(供給網の設定の確認、依存、Git のフック)
+setup: install hooks ## 初回の準備(依存と Git のフック)
 install: check-supply-chain ## 依存を入れる(ロックファイルのとおり)
 	pnpm install --frozen-lockfile
 hooks: ## Git のフックを入れる
@@ -35,13 +43,16 @@ doctor: check-supply-chain ## 道具と取得元を表示する
 	@node --version; pnpm --version; printf 'registry: '; pnpm config get registry
 
 # ---- 依存(エージェントが使うときは承認が要る) ----
-.PHONY: add add-dev remove why outdated
+.PHONY: add add-dev add-dev-exact remove why outdated
 add: check-supply-chain ## 依存を足す(make add pkg="zod")
 	$(call require,pkg,$(PKG_RE),make add pkg=zod)
 	@set -f; pnpm add $$pkg
 add-dev: check-supply-chain ## 開発用の依存を足す(make add-dev pkg="vitest")
 	$(call require,pkg,$(PKG_RE),make add-dev pkg=vitest)
 	@set -f; pnpm add -D $$pkg
+add-dev-exact: check-supply-chain ## 開発用の依存を版を固定して足す(make add-dev-exact pkg="oxfmt")
+	$(call require,pkg,$(PKG_RE),make add-dev-exact pkg=oxfmt)
+	@set -f; pnpm add -D -E $$pkg
 remove: ## 依存を外す(make remove pkg="zod")
 	$(call require,pkg,$(PKG_RE),make remove pkg=zod)
 	@set -f; pnpm remove $$pkg
@@ -87,21 +98,24 @@ generate-check: ## 生成コードに差分がないか
 
 # ---- 版と供給網 ----
 .PHONY: check-versions check-supply-chain audit
-check-versions: ## 依存、Node.js、GitHub Actions、レジストリが最新の安定版か
-	node scripts/check-versions.mjs
-check-supply-chain: ## .npmrc(Takumi Guard)と trustPolicy が外されていないか
+check-versions: ## 依存、Node.js、GitHub Actions、レジストリが最新の安定版か(make check-versions args="--no-node")
+	@set -f; if [ -n "$${args:-}" ]; then for v in $$args; do printf '%s\n' "$$v" | grep -Eq '$(VERSIONS_ARGS_RE)' || { echo "args として読めない: $$v" >&2; exit 2; }; done; fi
+	@set -f; node scripts/check-versions.mjs $${args:-}
+check-supply-chain: ## 依存の供給網の設定(.npmrc と pnpm-workspace.yaml)が外されていないか
 	@grep -Eq '^registry=https://npm\.flatt\.tech/?$$' .npmrc || { echo '.npmrc の registry が Takumi Guard ではない' >&2; exit 1; }
 	@grep -Eq '^trustPolicy:[[:space:]]*no-downgrade[[:space:]]*$$' pnpm-workspace.yaml || { echo 'pnpm-workspace.yaml に trustPolicy: no-downgrade がない' >&2; exit 1; }
+	@grep -Eq '^minimumReleaseAge:[[:space:]]*[1-9][0-9]*[[:space:]]*$$' pnpm-workspace.yaml || { echo 'pnpm-workspace.yaml に minimumReleaseAge がない' >&2; exit 1; }
+	@grep -Eq '^blockExoticSubdeps:[[:space:]]*true[[:space:]]*$$' pnpm-workspace.yaml || { echo 'pnpm-workspace.yaml に blockExoticSubdeps: true がない' >&2; exit 1; }
 audit: ## 脆弱性の照会(Takumi Guard は取得専用なので npm の公式に問い合わせる)
 	pnpm audit --prod --registry=https://registry.npmjs.org/
 
-# ---- デザインシステム(B / C を選んだときだけ。shadcn を devDependencies に入れておく) ----
+# ---- デザインシステム(B / C を選んだときだけ。make add-dev-exact pkg=shadcn で入れておく。使わないなら消す) ----
 .PHONY: ui-add ui-update
 ui-add: ## 部品を取り込む(make ui-add name="@8341/8341-base @8341/button")
-	@test -f components.json || { echo 'components.json がない(references/design-system.md)' >&2; exit 2; }
+	@test -f components.json || { echo 'components.json がない(ARCHITECTURE.md の「技術スタック」のデザインシステムの行)' >&2; exit 2; }
 	$(call require,name,$(UI_RE),make ui-add name=@8341/button)
 	@set -f; pnpm exec shadcn add $$name
 ui-update: ## 取り込んだ部品を取り込み直す(make ui-update name="@8341/button")
-	@test -f components.json || { echo 'components.json がない(references/design-system.md)' >&2; exit 2; }
+	@test -f components.json || { echo 'components.json がない(ARCHITECTURE.md の「技術スタック」のデザインシステムの行)' >&2; exit 2; }
 	$(call require,name,$(UI_RE),make ui-update name=@8341/button)
 	@set -f; pnpm exec shadcn add --overwrite $$name

@@ -18,7 +18,7 @@ description: AI 駆動開発のソフトウェアファクトリー(工程、エ
 | --- | --- |
 | `references/stations.md` | 7 つの工程、準備完了と完了の定義、仕様の状態 |
 | `references/roles.md` | エージェントの役割(planner、implementer、reviewer、retro)と人の役割 |
-| `references/guardrails.md` | 6 つの層、`--no-verify` への対策、実行の形式(A / B)、権限、危険なコマンド、完了前の検査、秘密情報、外部から入る文章 |
+| `references/guardrails.md` | 6 つの層、`--no-verify` への対策、実行の形式(A / B)、権限、危険なコマンド、完了前の検査、秘密情報、外部から入る文章、依存の追加 |
 | `references/improvement-loop.md` | PR ごとの振り返りと週次の改善、自己改善の歯止め |
 | `references/audit-checklist.md` | 工場の監査と、生成後の点検 |
 

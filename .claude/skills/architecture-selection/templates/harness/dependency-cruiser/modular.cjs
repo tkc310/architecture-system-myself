@@ -17,14 +17,14 @@ module.exports = {
     {
       name: "public-api-only",
       severity: "error",
-      comment: "他の modules は index.ts からだけ使う。内部のファイルやテーブル定義を import しない。",
+      comment: "他のモジュールは index.ts からだけ使う。内部のファイルやテーブル定義を import しない。",
       from: { path: `${U}([^/]+)/` },
       to: { path: `${U}[^/]+/`, pathNot: [`${U}$1/`, `${U}[^/]+/index\\.ts$`] },
     },
     {
       name: "outside-public-api-only",
       severity: "error",
-      comment: "modules の外（app/ を除く）からは index.ts だけを使う。",
+      comment: "modules/ の外(app/ を除く)からは index.ts だけを使う。",
       from: { pathNot: [U, "^src/app/"] },
       to: { path: `${U}[^/]+/`, pathNot: `${U}[^/]+/index\\.ts$` },
     },
@@ -45,14 +45,14 @@ module.exports = {
     {
       name: "command-query-scope",
       severity: "error",
-      comment: "commands/ と queries/ が同じ単位の中で使えるのは services/ と tables.ts と、自分と同じディレクトリだけ。",
+      comment: "commands/ と queries/ が同じモジュール(S では feature)の中で使えるのは services/ と tables.ts と、自分と同じディレクトリだけ。",
       from: { path: `${U}([^/]+)/(commands|queries)/` },
       to: { path: `${U}$1/`, pathNot: [`${U}$1/$2/`, `${U}$1/services/`, `${U}$1/tables\\.ts$`] },
     },
     {
       name: "service-scope",
       severity: "error",
-      comment: "services/ が同じ単位の中で使えるのは services/ と tables.ts だけ。",
+      comment: "services/ が同じモジュール(S では feature)の中で使えるのは services/ と tables.ts だけ。",
       from: { path: `${U}([^/]+)/services/` },
       to: { path: `${U}$1/`, pathNot: [`${U}$1/services/`, `${U}$1/tables\\.ts$`] },
     },

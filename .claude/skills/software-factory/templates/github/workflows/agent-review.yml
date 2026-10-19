@@ -2,6 +2,9 @@
 # 結果は PR へのコメントと、先頭コミットのステータス factory/review として残る(scripts/factory/post-review.sh)。
 # ブランチ保護で factory/review を必須チェックにすると、レビューを通っていないコミットはマージできない。
 # 認証は API キー(ANTHROPIC_API_KEY)。
+# 作業ツリーは比較元(base)の版にし、PR の版は取得して差分と git show で読むだけにする。
+# PR が変えたフック、reviewer.md、post-review.sh でレビューを動かさないため。
+# ただし、このワークフロー自体は PR の版で動くので、.github/ の変更は CODEOWNERS のレビューで止める。
 name: agent-review
 
 on:
@@ -28,12 +31,20 @@ jobs:
     env:
       FACTORY_JOB: review
       GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.base.ref }}
           fetch-depth: 0
           # このジョブは push しないので、トークンを .git/config に残さない
           persist-credentials: false
+      - name: PR の版を取得する(作業ツリーは切り替えない)
+        run: |
+          git -c "http.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" \
+            fetch origin "+refs/pull/${{ github.event.pull_request.number }}/head:refs/remotes/pr/head"
+          test "$(git rev-parse refs/remotes/pr/head)" = "${{ github.event.pull_request.head.sha }}" \
+            || { echo "::error::PR の先頭が変わりました。ジョブを再実行してください。"; exit 1; }
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -43,9 +54,10 @@ jobs:
 
             1. `gh api 'repos/{owner}/{repo}/pulls/${{ github.event.pull_request.number }}' --jq '.body'` で PR の説明を読み、
                「仕様」に書かれた docs/specs/ のパスを特定する。仕様がない PR は、PR の説明と Issue を仕様の代わりにする。
-            2. 差分は `git diff origin/${{ github.event.pull_request.base.ref }}...HEAD` で取る。
+            2. 差分は `git diff origin/${{ github.event.pull_request.base.ref }}...pr/head` で取る。作業ツリーは比較元の版なので、
+               PR の版のファイルは `git show pr/head:<パス>` で読む。
             3. reviewer.md の出力形式で結果を書き、次のように投稿する。必須の指摘があれば changes、なければ approve。
-               scripts/factory/post-review.sh ${{ github.event.pull_request.number }} <approve|changes> <<'EOF'
+               scripts/factory/post-review.sh ${{ github.event.pull_request.number }} ${{ github.event.pull_request.head.sha }} <approve|changes> <<'EOF'
                (本文)
                EOF
             コマンドは 1 回に 1 つずつ実行する(&&、|、;、リダイレクト、$( ) は使えない)。引数の中の記号は単一引用符で囲む。

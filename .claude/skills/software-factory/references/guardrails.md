@@ -61,8 +61,8 @@ Claude の無人ジョブ(PR のレビュー、週次の改善)をどこで動�
 **必須**
 
 - 既定は「確認を求める」にし、日常の作業で使う安全なコマンドだけを許可リストに入れる。
-  - 許可: 検査とテスト(`pnpm check`、`pnpm test` など)、読み取り系の Git(`git status`、`git diff`、`git log`)、ブランチ上でのコミット、`gh` の読み取り系
-  - 確認: 依存の追加(`pnpm add`)、`git push`、PR の作成、生成コマンド
+  - 許可: 検査とテスト(`make check`、`make test` など。コマンドは `Makefile` のターゲットだけを許す)、読み取り系の Git(`git status`、`git diff`、`git log`)、ブランチ上でのコミット、`gh` の読み取り系
+  - 確認: 依存の追加と削除(`make add`、`make add-dev`、`make remove`)、部品の取り込み(`make ui-add`、`make ui-update`)、`git push`、PR の作成、生成コマンド
   - 拒否: 秘密情報の読み取り(`.env*`、鍵ファイル)、破壊的なコマンド(`rm -rf`、`git push --force`、`git reset --hard`)、本番への操作(デプロイ、本番 DB への接続)、外部への送信(`curl` などでの POST)
 - 拒否は許可より優先される前提で書き、許可リストを広く取りすぎない。
 
@@ -73,13 +73,16 @@ Claude の無人ジョブ(PR のレビュー、週次の改善)をどこで動�
 **必須**
 
 - 次を含むコマンドを拒否する: 再帰的な削除(`rm -rf`)、強制プッシュ、`main` への直接プッシュとコミット、作業内容を捨てる操作(`reset --hard`、`clean -f`)、Git のフックの回避と無効化(上の節)、PR のマージ、`gh api` での書き込み、秘密情報ファイル(利用者の `~/.npmrc` を含む)の読み出し、依存の取得元や供給網の検査の上書き(`--registry`、`pnpm config set`、`npm_config_*`、`--config.*`、`.npmrc` と `pnpm-workspace.yaml` へのシェルからの書き込み)、パイプでのシェル実行(`curl ... | sh`)、外部への送信、本番環境への操作。
+- `make` を通さないコマンドを拒否する: `pnpm`、`pnpx`、`npx`、`npm`、`yarn`、`bun`、`bunx`、`corepack` と、`vitest`、`oxlint`、`oxfmt`、`tsc`、`depcruise`、`playwright`、`lefthook`、`node_modules/.bin/` の直接の実行。代わりのターゲットを示す。
+  - この規則は入口を一つに保つための誘導で、`sh -c '…'` のように文字列に包んだ呼び出しまでは止めない。依存の取得元と検査は、`.npmrc`、`pnpm-workspace.yaml`、CI の `make install`(前処理の `make check-supply-chain`)で守る。
+- `make` の呼び方を絞る: オプション(`-f`、`-C`、`-e`、`--eval` など)と、`pkg=` と `name=` 以外の変数の指定(`SHELL=` などでレシピを書き換えられる)を拒否する。`MAKEFLAGS` などの環境変数の指定も拒否する。
 - 拒否したときは、理由と代わりの手順を stderr に返す。
 
 ## 完了前の検査(層 3)
 
 **必須**
 
-- `Stop` のフックで、作業ツリーに変更があるのに `pnpm check` が通らない状態での完了を止め、失敗の内容をエージェントに返す。
+- `Stop` のフックで、作業ツリーに変更があるのに `make check` が通らない状態での完了を止め、失敗の内容をエージェントに返す。
 - 無限ループを避けるため、一度止めて再度の完了でも失敗するときは、止めずに人へ引き継ぐ。
 
 ## 秘密情報(層 2、4、5)

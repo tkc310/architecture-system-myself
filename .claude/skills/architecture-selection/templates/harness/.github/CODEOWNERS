@@ -15,3 +15,4 @@
 /pnpm-lock.yaml          @[org/platform]
 /pnpm-workspace.yaml     @[org/platform]
 /.npmrc                  @[org/platform]
+/Makefile                @[org/platform]

@@ -29,6 +29,7 @@
 | `infra/**`、`.github/**`、`Dockerfile` | 本番環境とデプロイの経路、CI のガードレールを変える |
 | `.env*` | 機密情報を含む |
 | `package.json` の依存、ロックファイル | 依存の追加はライセンスと供給網のリスクを伴う |
+| `Makefile`(と `makefile`、`GNUmakefile`、`*.mk`) | コマンドの入口。`make check` の中身を変えると、完了の条件と CI が弱まる([規約](./coding-conventions.md#コマンドは-make-で叩く)) |
 | `.npmrc`、`pnpm-workspace.yaml` | 依存の取得元(Takumi Guard)と供給網の検査(`trustPolicy` など)を外せる([セキュリティ](./security.md#依存の供給網)) |
 | `.cursor/**`、`.claude/**`(設定、エージェントの役割、フック、コマンド)、`scripts/guard-paths.sh`、`scripts/check-edited-file.sh`、`lefthook.yml`、`.dependency-cruiser.cjs`、`.oxlintrc.json`、`CODEOWNERS`、`AGENTS.md`、`CLAUDE.md`、`docs/factory/**`、`scripts/factory/**`、`.git/**` | ガードレール自体を弱める変更になりうる。週次の改善ジョブ(GitHub Actions かルーティン)だけは、規則を強める下書き PR のために `.dependency-cruiser.cjs`、`.oxlintrc.json`、`AGENTS.md` を編集できる |
 

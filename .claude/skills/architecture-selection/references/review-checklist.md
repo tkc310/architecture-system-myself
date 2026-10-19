@@ -11,7 +11,8 @@
 ## 技術スタックと性能
 - [ ] 採用するライブラリの現行リリースと保守状況を公式の情報で確認した。版は ARCHITECTURE.md にだけ書いた
 - [ ] `.npmrc` の `registry` が `https://npm.flatt.tech/`(Takumi Guard)で、`pnpm-workspace.yaml` に `trustPolicy: no-downgrade` がある。どちらにもトークンがなく、どちらも保護パスと CODEOWNERS にある。`packageManager` の pnpm が 10.21 以上
-- [ ] `pnpm check:versions` で、依存、Node.js(LTS)、GitHub Actions に古いものとプレリリースがない。最新にしないものは理由が ADR にある
+- [ ] コマンドの入口が `Makefile` にあり、AGENTS.md・CI・lefthook・権限の規則が `make <ターゲット>` を指している。`pnpm` や各ツールを直接叩く手順が文書に残っていない。値を渡すターゲットは値を環境変数で受け、形を確かめている
+- [ ] `make check-versions` で、依存、Node.js(LTS)、GitHub Actions に古いものとプレリリースがない。最新にしないものは理由が ADR にある
 - [ ] 既定から外した項目には、測定の結果か要件上の理由がある
 - [ ] 性能対策の段階を上げた場合、各段階の根拠（測定結果か測定の計画）がある
 - [ ] 段階 4 以上と、oxlint・oxfmt 以外の Oxc ツールの採用は、ユーザーに確認した
@@ -22,8 +23,8 @@
 ## 構造とハーネス
 - [ ] ディレクトリ構成と `.dependency-cruiser.cjs` の段階が一致している
 - [ ] M と L で、各モジュールの `README.md`、`AGENTS.md`、所有するテーブルの一覧がある
-- [ ] 空の雛形で `pnpm check` が通る
-- [ ] 境界違反のファイルを置くと `pnpm lint:deps` が失敗する（確認後に削除した）
+- [ ] 空の雛形で `make check` が通る
+- [ ] 境界違反のファイルを置くと `make lint-deps` が失敗する（確認後に削除した）
 - [ ] CI に品質ゲートの必須ステージ（フォーマット、lint と依存ルール、型、テストとカバレッジ、生成コードの差分、ビルド）がある
 - [ ] 保護パスが二つ以上の仕組み（フック、CODEOWNERS とブランチ保護など）で守られている
 - [ ] `AGENTS.md` には、機械で強制できないルールだけが書かれている

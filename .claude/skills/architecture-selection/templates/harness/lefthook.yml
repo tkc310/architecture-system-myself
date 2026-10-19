@@ -16,4 +16,4 @@ pre-commit:
 pre-push:
   commands:
     check:
-      run: pnpm check
+      run: make check

@@ -14,7 +14,7 @@
 1. **コネクタを外す。** 作成画面の Connectors から、すべてのコネクタを外す。どちらのルーティンも GitHub 以外に触れない。
 2. **クラウド環境をジョブごとに分ける。** `factory-review` と `factory-improve` の 2 つの環境を作り、環境変数を設定する。
    - `factory-review`: `FACTORY_JOB=review`
-   - `factory-improve`: `FACTORY_JOB=improve`、セットアップスクリプトに `pnpm install --frozen-lockfile`
+   - `factory-improve`: `FACTORY_JOB=improve`、セットアップスクリプトに `make install`
    - ネットワークは既定の Trusted のままにする。秘密情報は環境変数に入れない。
    - `FACTORY_JOB` があると、フックがジョブごとの許可リストに切り替わり、専用スクリプト(`scripts/factory/post-review.sh`、`open-draft-pr.sh`、`open-issue.sh`)の実行と、改善ジョブによる規則ファイルの編集を許す。許可リストにないコマンド、リダイレクトによる書き込み、コマンド置換は拒否される。エージェントが会話の中で設定しても、フックには届かない。
 3. **レビューを動かす PR を絞る。** GitHub トリガーのフィルタで、次を両方指定する。

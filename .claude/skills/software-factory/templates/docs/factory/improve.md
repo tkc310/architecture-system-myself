@@ -24,7 +24,7 @@ GitHub の情報は REST API(`gh api 'repos/{owner}/{repo}/...'`)だけで読む
   - エージェントのレビュー: `gh api 'repos/{owner}/{repo}/issues/<番号>/comments'` のうち、`<!-- factory-review` で始まるコメント
   - 人のレビュー: `gh api 'repos/{owner}/{repo}/pulls/<番号>/comments'` と `gh api 'repos/{owner}/{repo}/pulls/<番号>/reviews'`
 
-- 版の鮮度: `pnpm check:versions` を実行し、古い依存、プレリリース、古い GitHub Actions、古い Node.js を数える。
+- 版の鮮度: `make check-versions` を実行し、古い依存、プレリリース、古い GitHub Actions、古い Node.js を数える。
 
 ### 2. 候補を選ぶ
 
@@ -46,7 +46,7 @@ LESSONS.md の運用ルールの優先順位(型 → 依存ルール → lint �
 
 1. `git switch -c factory/improve-<YYYYMMDD>-<短い名前>`
 2. 規則を変える。規則が実際に止めることを示すため、違反する例(依存ルールなら違反する import を含む fixture、lint なら違反するコード、型ならコンパイルが失敗する例を `// @ts-expect-error` で示すテスト)を足す。
-3. `pnpm check` が通ることを確かめる。既存のコードが新しい規則に違反する場合は、PR を作らずに Issue にし、違反の箇所を列挙する。
+3. `make check` が通ることを確かめる。既存のコードが新しい規則に違反する場合は、PR を作らずに Issue にし、違反の箇所を列挙する。
 4. LESSONS.md の該当する行の状態を「昇格済み」にし、昇格先を書く。
 5. コミットし、`git push -u origin <ブランチ>` のあと、次のコマンドで下書き PR を作る。
 

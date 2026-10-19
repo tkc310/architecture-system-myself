@@ -1,5 +1,5 @@
 {
-  "//": "package.json の scripts と devDependencies に統合し、このファイルは置かない。devDependencies は導入時に pnpm add -D で最新の安定版を入れ、check:versions で確かめる。oxfmt は exact で固定する(pnpm add -D -E oxfmt)。packageManager(例: \"pnpm@<版>\")も package.json に書く(pnpm/action-setup がこの版を使う)。",
+  "//": "package.json の scripts と devDependencies に統合し、このファイルは置かない。devDependencies は導入時に pnpm add -D で最新の安定版を入れ、check:versions で確かめる。oxfmt は exact で固定する(pnpm add -D -E oxfmt)。packageManager(例: \"pnpm@<版>\"。最新の安定版)と engines.pnpm(\">=10.21.0\"。trustPolicy が効く版)も package.json に書く(pnpm/action-setup は packageManager の版を使う。古い pnpm は trustPolicy を黙って無視する)。",
   "scripts": {
     "format": "oxfmt",
     "format:check": "oxfmt --check",

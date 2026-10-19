@@ -75,9 +75,12 @@ has '(curl|wget)[^|]*\|[[:space:]]*(sudo[[:space:]]+)?(ba|z)?sh' \
   && deny "ダウンロードしたスクリプトの実行" "スクリプトを保存して内容を人に確認してもらう"
 has_i 'curl.*([[:space:]](-X|--request)[=[:space:]]*(POST|PUT|PATCH|DELETE)|[[:space:]](-d|--data[a-z-]*|-F|--form|-T|--upload-file|--json)([=[:space:]]|[^[:space:]]))' \
   && deny "外部への送信" "送信は人の承認を得てから行う"
-if printf '%s\n%s' "$scan" "$scan_dq" | sed -E 's/\.env\.example//g' | grep -Eq '(^|[^[:alnum:]_])\.env([.[:space:]]|$)|id_rsa|\.pem([[:space:]]|$)|\.key([[:space:]]|$)'; then
+if printf '%s\n%s' "$scan" "$scan_dq" | sed -E 's/\.env\.example//g' | grep -Eq '(^|[^[:alnum:]_])\.env([.[:space:]]|$)|(~|HOME\}?)/\.npmrc|id_rsa|\.pem([[:space:]]|$)|\.key([[:space:]]|$)'; then
   deny "秘密情報のファイルへのアクセス" "必要な値の名前だけを人に確認する"
 fi
+# 依存の取得元と供給網の検査(.npmrc の registry、pnpm-workspace.yaml の trustPolicy など)を、コマンドの引数や環境変数で上書きさせない
+has_i '(^|[[:space:];&|(])(npm|pnpm|yarn)[[:space:]]+config[[:space:]]+(set|delete|rm)|--registry([=[:space:]]|$)|(^|[^[:alnum:]_])(npm|pnpm)_config_|--config\.|--(trust-policy|minimum-release-age|block-exotic-subdeps|dangerously-allow-all-builds)|(>|tee[[:space:]]|sed[[:space:]]+-i).*(\.npmrc|pnpm-workspace\.yaml)' \
+  && deny "依存の取得元や供給網の検査を変える操作" "取得元と検査の設定は人が変える(.npmrc と pnpm-workspace.yaml は保護パス)。公開は人が --registry を付けて行う"
 has '(kubectl|helm)[[:space:]]+(apply|delete|upgrade|install)|terraform[[:space:]]+(apply|destroy)|(vercel|netlify|flyctl|fly|wrangler)[[:space:]].*(deploy|--prod)' \
   && deny "本番や共有環境への操作" "デプロイは CI と人の承認を通す"
 

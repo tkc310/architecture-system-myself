@@ -10,6 +10,7 @@
 
 ## 技術スタックと性能
 - [ ] 採用するライブラリの現行リリースと保守状況を公式の情報で確認した。版は ARCHITECTURE.md にだけ書いた
+- [ ] `.npmrc` の `registry` が `https://npm.flatt.tech/`(Takumi Guard)で、`pnpm-workspace.yaml` に `trustPolicy: no-downgrade` がある。どちらにもトークンがなく、どちらも保護パスと CODEOWNERS にある。`packageManager` の pnpm が 10.21 以上
 - [ ] `pnpm check:versions` で、依存、Node.js(LTS)、GitHub Actions に古いものとプレリリースがない。最新にしないものは理由が ADR にある
 - [ ] 既定から外した項目には、測定の結果か要件上の理由がある
 - [ ] 性能対策の段階を上げた場合、各段階の根拠（測定結果か測定の計画）がある

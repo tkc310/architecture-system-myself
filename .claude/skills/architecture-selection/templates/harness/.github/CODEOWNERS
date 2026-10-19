@@ -13,3 +13,5 @@
 /AGENTS.md               @[org/platform]
 /package.json            @[org/platform]
 /pnpm-lock.yaml          @[org/platform]
+/pnpm-workspace.yaml     @[org/platform]
+/.npmrc                  @[org/platform]

@@ -29,7 +29,7 @@ ARCHITECTURE.md には採った値と外した理由だけを書き、ルール�
 
 1. **ヒアリング**（`references/hearing.md`）。リポジトリから分かることを先に調べ、推測できない項目だけを一度にまとめて質問する。回答を要約して確認してから先に進む。
 2. **構造の段階**（`references/scale-selection.md`）。S / M / L を判定する。境界上でどちらも同程度に妥当なときは、ユーザーに確認する。
-3. **技術スタック**（`references/tech-selection.md`）。既定から外れる項目を決める。採用するライブラリは、公式ドキュメントで現行のリリースと導入手順を確認してから書く。記憶で版や設定を書かない。依存は `pnpm add` で最新の安定版を入れ、プレリリース(`-rc`、`-beta`、`canary` など)を選ばない。
+3. **技術スタック**（`references/tech-selection.md`）。既定から外れる項目を決める。採用するライブラリは、公式ドキュメントで現行のリリースと導入手順を確認してから書く。記憶で版や設定を書かない。依存は `pnpm add` で最新の安定版を入れ、プレリリース(`-rc`、`-beta`、`canary` など)を選ばない。依存を入れる前に、ハーネスの `.npmrc`(Takumi Guard)と `pnpm-workspace.yaml`(`trustPolicy: no-downgrade`)を置く(`references/security.md` の「依存の供給網」)。
 4. **性能**（`references/performance-ladder.md`）。性能の要件があるときだけ、必要な段階を決める。段階 4（WebAssembly）と 5（Go）は、ユーザーに確認してから採る。
 5. **デザインシステム**（`references/design-system.md`）。画面があるときだけ、8341-ui を使わない / 使う / 作る、から選ぶ。作る場合は、新しいリポジトリを作る前にユーザーの承認を得る。使う・作る場合は、部品を取り込み、DESIGN.md を置く。
 6. **構造と CQS**（`references/principles.md`、`references/cqs.md`）。採った段階のディレクトリを作り、モジュール（S では feature）の一覧と所有するテーブルを決める。

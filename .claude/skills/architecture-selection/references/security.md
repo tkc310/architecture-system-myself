@@ -35,6 +35,33 @@
 - 外から取得した内容をそのまま出力せず、必要に応じて要約や言い換えをする。
 - 本来の作業の目的を保ち、専門的で建設的な書き方をする。出力に不安があるときは、注意を添えて人の判断を仰ぐ。
 
+## 依存の供給網
+
+npm のパッケージは、公開者のアカウントの乗っ取りや、悪性のパッケージの公開で汚染されうる。導入時の既定として、次の 2 つを雛形([ハーネス](../templates/harness/README.md))に入れる。
+
+| 対策 | 置き場所 | 止めるもの |
+| --- | --- | --- |
+| `trustPolicy: no-downgrade` | `pnpm-workspace.yaml` | 前の版より信頼の度合い(trusted publisher、provenance)が下がった版。CI から公開されていたパッケージが、乗っ取られたアカウントから手元で公開された場合など |
+| [Takumi Guard](https://shisho.dev/docs/t/guard/quickstart/npm/)(GMO Flatt Security のレジストリのプロキシ) | `.npmrc` の `registry=https://npm.flatt.tech/` | 既知の悪性パッケージ。取得の時点で 403 になる |
+
+**必須**
+
+- `pnpm-workspace.yaml` に `trustPolicy: no-downgrade` を書き、`.npmrc` の `registry` を `https://npm.flatt.tech/` にする。どちらも保護パスにする([編集制約](./editing-constraints.md))。CI はインストールの前に、この 2 つが残っていることを確かめる。
+- pnpm は 10.21 以上を使う。`package.json` の `packageManager` を最新の安定版にし、`engines.pnpm` を `>=10.21.0` にする。
+  - 理由: `trustPolicy` より古い pnpm は、この設定を知らないまま黙って無視する。
+- pnpm 11 以降で既定で有効な `minimumReleaseAge`(公開から 24 時間たっていない版を入れない)と `blockExoticSubdeps`(間接依存が git や URL から入るのを止める)を無効にしない。
+- Takumi Guard のトークンをリポジトリに書かない。匿名(登録なし、無料)で悪性パッケージを止められるので、既定は匿名にする。
+  - 取得の記録と、取得後に悪性と分かったときの通知が要る人は、メールで登録したトークン(`tg_anon_…`)を各自の `~/.npmrc` に `//npm.flatt.tech/:_authToken=…` で書く。
+  - 組織で使うとき(有償)は、CI で [setup-takumi-guard-npm](https://github.com/flatt-security/setup-takumi-guard-npm) に `bot-id` を渡し、GitHub の OIDC で短期のトークンを得る。長期のシークレットは置かない。
+- `trustPolicy` で止まった版を `trustPolicyExclude` で外すときは、版まで指定し(`pkg@1.2.3`)、公開元の告知で理由を確かめ、ADR に書いて承認を得る。名前だけで外さない。止まったら、まず一つ前の版を使う。
+- エージェントに、取得元や検査の設定をコマンドで上書きさせない(`--registry`、`pnpm config set`、`npm_config_*`、`--config.*`)。software-factory のガードレールはこれを拒否する。
+
+**推奨**
+
+- Takumi Guard は取得専用。公開(`pnpm publish`)と脆弱性の照会(`pnpm audit`)は、`--registry=https://registry.npmjs.org/` を付けて npm の公式のレジストリに行う。
+- 非公開のパッケージを scope ごとに別のレジストリ(`@org:registry=…`)から取ると、そのパッケージは Takumi Guard の検査を通らない。scope の外の依存は Takumi Guard から取る。
+- 導入後の確認: 依存に加えない作業用のディレクトリで、Takumi Guard の検査用のパッケージ `@panda-guard/test-malicious` の取得が 403 になることを確かめる。
+
 ## 判断の基準
 
 実行する前に次を確かめ、一つでも「いいえ」なら止めて人に確認する。

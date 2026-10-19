@@ -31,9 +31,9 @@ Git のフック(層 4)は、Git の仕組み上、手元の操作で必ず回�
 **必須**
 
 - Git のフックで行う検査(整形、lint、依存ルール、秘密情報、エージェントのレビュー)は、すべて GitHub 側でも行い、その結果をブランチ保護の必須チェックにする。Git のフックは「早く気づくため」のもので、マージの条件にしない。
-- エージェントのレビューの結果は、先頭コミットのステータス `factory/review` として残す(`scripts/factory/post-review.sh`)。ステータスはコミットに付くので、新しいコミットを push するとレビューのやり直しが要る。
+- エージェントのレビューの結果は、先頭コミットのステータス `factory/review` として残す(`scripts/factory/post-review.sh`)。ステータスはコミットに付くので、新しいコミットを push するとレビューのやり直しが要る。`post-review.sh` は、レビューした sha と PR の先頭が違えば投稿しない(レビューの間の push を承認しないため)。
 - コミットのステータスは、書き込み権限のある人やワークフローなら誰でも付けられる。どこまで偽装を防げるかは形式で異なる。
-  - 形式 A: ルールセットの必須チェックで `factory/review` の発行元を GitHub Actions に固定する。他の発行元が付けたステータスは数えられない。
+  - 形式 A: ルールセットの必須チェックで `factory/review` の発行元を GitHub Actions に固定する。他の発行元が付けたステータスは数えられない。レビューのジョブは作業ツリーを比較元の版にし、PR が変えたフック、`reviewer.md`、`post-review.sh` では動かない。ただし、ワークフロー自体は PR の版で動くので、`.github/` と `scripts/factory/` の変更は CODEOWNERS のレビューで止める。
   - 形式 B: ステータスはあなたのアカウントで付くので、発行元を固定できない。書き込み権限のある人が手で `success` を付ければ通ってしまう。故意の偽装は防げないので、CODEOWNERS のレビューと、人のマージ判断で補う。エージェントによる偽装は、`post-review.sh` を `FACTORY_JOB=review` のジョブに限ることと、`gh api` での書き込みの拒否で防ぐ。
 - ブランチ保護(ルールセット)の迂回を許すリストを空にする。管理者も迂回できないようにする。
   - 理由: 形式 B のルーティンは、あなたの GitHub アカウントとして動く。あなたが迂回できる規則は、ルーティンも迂回できる。
@@ -63,19 +63,19 @@ Claude の無人ジョブ(PR のレビュー、週次の改善)をどこで動�
 - 既定は「確認を求める」にし、日常の作業で使う安全なコマンドだけを許可リストに入れる。
   - 許可: 検査とテスト(`make check`、`make test` など。コマンドは `Makefile` のターゲットだけを許す)、読み取り系の Git(`git status`、`git diff`、`git log`)、ブランチ上でのコミット、`gh` の読み取り系
   - 確認: 依存の追加と削除(`make add`、`make add-dev`、`make remove`)、部品の取り込み(`make ui-add`、`make ui-update`)、`git push`、PR の作成、生成コマンド
-  - 拒否: 秘密情報の読み取り(`.env*`、鍵ファイル)、破壊的なコマンド(`rm -rf`、`git push --force`、`git reset --hard`)、本番への操作(デプロイ、本番 DB への接続)、外部への送信(`curl` などでの POST)
+  - 拒否: 秘密情報の読み取り(`.env*`、鍵ファイル)、破壊的なコマンド(`rm -rf`、`git push --force`、`git reset --hard`)、パッケージマネージャーの直接の実行。本番への操作と外部への送信(`curl` などでの POST)は、権限ではなく `guard-bash.sh` で拒否する
 - 拒否は許可より優先される前提で書き、許可リストを広く取りすぎない。
 
 ## 危険なコマンドの検査(層 3)
 
-権限の規則は文字列の一致で判定するので、パイプやサブシェルで包んだコマンドを取りこぼすことがある。`PreToolUse` のフックで、Bash のコマンド全体を検査する(`templates/claude/hooks/guard-bash.sh`)。
+権限の規則はコマンドの形の一致で判定するので、`bash -c`、`xargs`、変数などで包んだコマンドを取りこぼすことがある。`PreToolUse` のフックで、Bash のコマンド全体を検査する(`templates/claude/hooks/guard-bash.sh`)。
 
 **必須**
 
 - 次を含むコマンドを拒否する: 再帰的な削除(`rm -rf`)、強制プッシュ、`main` への直接プッシュとコミット、作業内容を捨てる操作(`reset --hard`、`clean -f`)、Git のフックの回避と無効化(上の節)、PR のマージ、`gh api` での書き込み、秘密情報ファイル(利用者の `~/.npmrc` を含む)の読み出し、依存の取得元や供給網の検査の上書き(`--registry`、`pnpm config set`、`npm_config_*`、`--config.*`、`.npmrc` と `pnpm-workspace.yaml` へのシェルからの書き込み)、パイプでのシェル実行(`curl ... | sh`)、外部への送信、本番環境への操作。
-- `make` を通さないコマンドを拒否する: `pnpm`、`pnpx`、`npx`、`npm`、`yarn`、`bun`、`bunx`、`corepack` と、`vitest`、`oxlint`、`oxfmt`、`tsc`、`depcruise`、`playwright`、`lefthook`、`node_modules/.bin/` の直接の実行。代わりのターゲットを示す。
+- `make` を通さないコマンドを拒否する: `pnpm`、`pnpx`、`npx`、`npm`、`yarn`、`bun`、`bunx`、`corepack` と、`vitest`、`oxlint`、`oxfmt`、`tsc`、`tsx`、`depcruise`、`playwright`、`lefthook`、`drizzle-kit`、`shadcn`、`node_modules/.bin/`、`node scripts/` の直接の実行。代わりのターゲットを示す。
   - この規則は入口を一つに保つための誘導で、`sh -c '…'` のように文字列に包んだ呼び出しまでは止めない。依存の取得元と検査は、`.npmrc`、`pnpm-workspace.yaml`、CI の `make install`(前処理の `make check-supply-chain`)で守る。
-- `make` の呼び方を絞る: オプション(`-f`、`-C`、`-e`、`--eval` など)と、`pkg=` と `name=` 以外の変数の指定(`SHELL=` などでレシピを書き換えられる)を拒否する。`MAKEFLAGS` などの環境変数の指定も拒否する。
+- `make` の呼び方を絞る: オプション(`-f`、`-C`、`-e`、`--eval` など)と、`pkg=`、`name=`、`args=` 以外の変数の指定(`SHELL=` などでレシピを書き換えられる)を拒否する。`MAKEFLAGS` などの環境変数の指定も拒否する。
 - 拒否したときは、理由と代わりの手順を stderr に返す。
 
 ## 完了前の検査(層 3)
@@ -83,7 +83,7 @@ Claude の無人ジョブ(PR のレビュー、週次の改善)をどこで動�
 **必須**
 
 - `Stop` のフックで、作業ツリーに変更があるのに `make check` が通らない状態での完了を止め、失敗の内容をエージェントに返す。
-- 無限ループを避けるため、一度止めて再度の完了でも失敗するときは、止めずに人へ引き継ぐ。
+- 無限ループを避けるため、2 回止めても直らないときは、止めずに人へ引き継ぐ。push の前の独立レビュー(`local-review.sh`)の中では止めない。
 
 ## 秘密情報(層 2、4、5)
 

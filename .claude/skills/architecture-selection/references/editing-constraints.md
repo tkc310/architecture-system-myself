@@ -10,9 +10,9 @@
 
 | 作業 | 編集してよい範囲 |
 | --- | --- |
-| 機能の追加 | 対象モジュールの `src/modules/<module>/`（S では `src/features/<feature>/`）、`src/app/` の該当する入口 |
+| 機能の追加 | 対象モジュールの `src/modules/<module>/`(S では `src/features/<feature>/`)、`src/app/` の該当する入口 |
 | バグの修正 | 原因のあるモジュールと、その再現テスト |
-| リファクタリング | 対象モジュールの中だけ。公開 API（`index.ts`）を変えるときは確認する |
+| リファクタリング | 対象モジュールの中だけ。公開 API(`index.ts`)を変えるときは確認する |
 | テストの追加 | `*.test.ts` とテスト用のヘルパー。実装は変えない |
 
 ## 保護パス
@@ -29,11 +29,13 @@
 | `infra/**`、`.github/**`、`Dockerfile` | 本番環境とデプロイの経路、CI のガードレールを変える |
 | `.env*` | 機密情報を含む |
 | `package.json` の依存、ロックファイル | 依存の追加はライセンスと供給網のリスクを伴う |
+| `tsconfig.json`、`vitest.config.ts`、`.oxfmtrc.json` | 型、カバレッジの閾値、整形の基準を緩められる |
 | `Makefile`(と `makefile`、`GNUmakefile`、`*.mk`) | コマンドの入口。`make check` の中身を変えると、完了の条件と CI が弱まる([規約](./coding-conventions.md#コマンドは-make-で叩く)) |
 | `.npmrc`、`pnpm-workspace.yaml` | 依存の取得元(Takumi Guard)と供給網の検査(`trustPolicy` など)を外せる([セキュリティ](./security.md#依存の供給網)) |
+| `src/shared/ui/**`(デザインシステムの B / C を選んだとき) | 取り込んだ部品を手で書き換えると、取り込み直したときに消え、デザインシステムの検証からも外れる([デザインシステム](./design-system.md)) |
 | `.cursor/**`、`.claude/**`(設定、エージェントの役割、フック、コマンド)、`scripts/guard-paths.sh`、`scripts/check-edited-file.sh`、`lefthook.yml`、`.dependency-cruiser.cjs`、`.oxlintrc.json`、`CODEOWNERS`、`AGENTS.md`、`CLAUDE.md`、`docs/factory/**`、`scripts/factory/**`、`.git/**` | ガードレール自体を弱める変更になりうる。週次の改善ジョブ(GitHub Actions かルーティン)だけは、規則を強める下書き PR のために `.dependency-cruiser.cjs`、`.oxlintrc.json`、`AGENTS.md` を編集できる |
 
-- 保護パスは、指示（Cursor ルール、AGENTS.md）だけで守らない。下の表の、強制する仕組みのうち二つ以上で守る。
+- 保護パスは、指示(Cursor ルール、AGENTS.md)だけで守らない。下の表の、強制する仕組みのうち二つ以上で守る。雛形では、エージェントのフック(`scripts/guard-paths.sh`)と CODEOWNERS + ブランチ保護の二つで守るので、この表のパスは両方に書く。
   - 理由: 指示はエージェントが読み落とすことがあり、強制にならない。
 
 ## 人間の承認が要る操作
@@ -55,11 +57,11 @@
 | モジュールの AGENTS.md | M と L の `src/modules/<module>/AGENTS.md` | 指示 |
 | Cursor のフック | `.cursor/hooks.json` | エージェントの操作をブロックする。`preToolUse` で保護パスへの `Write` と `Delete` を、`beforeShellExecution` で危険なコマンドを拒否できる |
 | Claude Code のフック | `.claude/settings.json` | エージェントの操作をブロックする。`PreToolUse` で保護パスへの `Edit` と `Write` を拒否し、`PostToolUse` で整形と依存ルールの検査結果をエージェントに返せる |
-| Git フック | husky や lefthook | 手元のコミットを止める。`--no-verify` で回避できる |
+| Git フック | `lefthook.yml`(lefthook) | 手元のコミットを止める。`--no-verify` で回避できる |
 | 依存ルール | dependency-cruiser | CI で境界違反を止める |
 | CODEOWNERS とブランチ保護 | `.github/CODEOWNERS` | マージの前に、指定した担当者の承認を必須にする |
 
-この表の例は、サービスのリポジトリに置くものである。雛形は `templates/harness/` にある。使うエージェント（Cursor、Claude Code、両方）に合わせてフックを置く。保護パスの判定は `scripts/guard-paths.sh` を共有し、両方のフックから呼ぶ。
+この表の例は、サービスのリポジトリに置くものである。雛形は `templates/harness/` にある。使うエージェント(Cursor、Claude Code、両方)に合わせてフックを置く。保護パスの判定は `scripts/guard-paths.sh` を共有し、両方のフックから呼ぶ。
 
 ### Cursor ルールの例
 
@@ -79,7 +81,7 @@ alwaysApply: false
   "version": 1,
   "hooks": {
     "preToolUse": [
-      { "command": ".cursor/hooks/guard-paths.sh", "matcher": "Write|Delete", "failClosed": true }
+      { "command": "scripts/guard-paths.sh", "matcher": "Write|Delete", "failClosed": true }
     ]
   }
 }

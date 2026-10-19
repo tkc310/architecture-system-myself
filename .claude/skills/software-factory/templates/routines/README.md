@@ -15,15 +15,15 @@
 2. **クラウド環境をジョブごとに分ける。** `factory-review` と `factory-improve` の 2 つの環境を作り、環境変数を設定する。
    - `factory-review`: `FACTORY_JOB=review`
    - `factory-improve`: `FACTORY_JOB=improve`、セットアップスクリプトに `make install`
-   - ネットワークは既定の Trusted のままにする。秘密情報は環境変数に入れない。
-   - `FACTORY_JOB` があると、フックがジョブごとの許可リストに切り替わり、専用スクリプト(`scripts/factory/post-review.sh`、`open-draft-pr.sh`、`open-issue.sh`)の実行と、改善ジョブによる規則ファイルの編集を許す。許可リストにないコマンド、リダイレクトによる書き込み、コマンド置換は拒否される。エージェントが会話の中で設定しても、フックには届かない。
+   - 両方の環境に `GH_REPO=<owner>/<repo>` も設定する(リモートの URL からリポジトリを推測できない環境でも、`gh` が対象を誤らないように)。
+   - ネットワークは既定の Trusted を基本にする。`factory-improve` は依存を Takumi Guard から入れるので、許可するドメインに `npm.flatt.tech` を足す。秘密情報は環境変数に入れない。
+   - `FACTORY_JOB` の働きは、software-factory スキルの `references/guardrails.md` の「実行の形式」にある。
+   - 改善ジョブは `claude/factory-improve-*` のブランチに push する。クラウドのセッションが push できるのは、既定で `claude/` で始まるブランチだけなので、この制限は外さない。
 3. **レビューを動かす PR を絞る。** GitHub トリガーのフィルタで、次を両方指定する。
    - Author が「次のどれか」: 信頼できる開発者の GitHub ユーザー名
    - Is draft が `false`
    - 理由: PR の本文は第三者も書ける。知らない人の PR の文章を、許可の確認なしで動くエージェントに読ませない。
-4. **ブランチ保護で、管理者も迂回できないようにする。** ルーティンはあなたのアカウントとして push するので、あなたが迂回できる規則はルーティンも迂回できる。ルールセットで次を設定し、迂回を許すリスト(Bypass list)を空にする。
-   - `main` への直接の push と強制 push の禁止
-   - 必須チェック: 品質ゲートの 6 ステージ、`secrets-scan`、`factory/review`
+4. **ブランチ保護で、管理者も迂回できないようにする。** ルーティンはあなたのアカウントとして push するので、あなたが迂回できる規則はルーティンも迂回できる。設定の内容は software-factory スキルの `templates/README.md` の「置いた後に人が行うこと」の 4 に従い、迂回を許すリスト(Bypass list)を空にする。
    - 注意: 形式 B の `factory/review` はあなたのアカウントで付くので、発行元を固定できない。書き込み権限のある人が手で付けた `success` も通る。コードオーナーのレビューを必須にして補う
 
 ## 作り方(Web)
@@ -36,7 +36,7 @@
 6. Connectors をすべて外して作成する。
 7. `factory-improve` も同じ手順で、スケジュールのトリガーで作る。
 
-Claude Code から作る場合は `/schedule` で週次のルーティンを作り、GitHub トリガーは `/schedule` で既存のルーティンに追加するか、Web で追加する。
+Claude Code から作る場合は、`/schedule` で週次のルーティンを作る。GitHub トリガーは Web の編集画面で追加する。
 
 ## 動作の確認
 

@@ -1,6 +1,6 @@
 /**
  * 構造 L: layered の依存ルール。references/principles.md の「依存の向き」の表をそのまま設定にしたもの。
- * L の形（domain/ application/ infrastructure/）にしたモジュールと、M の形のまま残した薄いモジュールの
+ * L の形(domain/ application/ infrastructure/)にしたモジュールと、M の形のまま残した薄いモジュールの
  * 両方に効く。層ごとのルールは、そのディレクトリを持つモジュールにだけ当たる。
  * 対象リポジトリでは `.dependency-cruiser.cjs` として置く。
  * @type {import('dependency-cruiser').IConfiguration}
@@ -8,7 +8,7 @@
 const U = "^src/modules/";
 const ROOT = "^src/app/composition-root\\.ts$";
 
-/** domain/ が import してよい npm パッケージ（I/O を行わないもの）。必要に応じて足す。 */
+/** domain/ が import してよい npm パッケージ(I/O を行わないもの)。必要に応じて足す。 */
 const PURE_PACKAGES = ["zod", "neverthrow"];
 
 module.exports = {
@@ -30,7 +30,7 @@ module.exports = {
     {
       name: "outside-public-api-only",
       severity: "error",
-      comment: "modules/ の外（app/ を除く）からは index.ts だけを使う。",
+      comment: "modules/ の外(app/ を除く)からは index.ts だけを使う。",
       from: { pathNot: [U, "^src/app/"] },
       to: { path: `${U}[^/]+/`, pathNot: `${U}[^/]+/index\\.ts$` },
     },
@@ -38,7 +38,7 @@ module.exports = {
       name: "app-entry-points",
       severity: "error",
       comment:
-        "app/ が使えるのは index.ts と ui/（薄いモジュールでは commands/ も）。infrastructure/ はコンポジションルートからだけ。",
+        "app/ が使えるのは index.ts と ui/(薄いモジュールでは commands/ も)。infrastructure/ はコンポジションルートからだけ。",
       from: { path: "^src/app/", pathNot: ROOT },
       to: { path: `${U}[^/]+/`, pathNot: `${U}[^/]+/(index\\.ts$|ui/|commands/)` },
     },
@@ -92,7 +92,7 @@ module.exports = {
         ],
       },
     },
-    // ---- M の形のまま残した薄いモジュール向け（slice / modular と同じ） ----
+    // ---- M の形のまま残した薄いモジュール向け(slice / modular と同じ) ----
     {
       name: "index-does-not-export-commands",
       severity: "error",

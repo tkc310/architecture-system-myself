@@ -1,6 +1,6 @@
 # 週次の改善の手順
 
-週次の改善ジョブ(形式 A: GitHub Actions の `factory-improve.yml`、形式 B: ルーティンの factory-improve)が、この手順で動く。人が手元で同じことをするときも、この手順に従う。
+週次の改善ジョブ(形式 A: GitHub Actions の `factory-improve.yml`、形式 B: ルーティン `factory-improve`)が、この手順で動く。人が手元で同じことをするときも、この手順に従う。
 
 GitHub の情報は REST API(`gh api 'repos/{owner}/{repo}/...'`)だけで読む。ルーティンの環境では GraphQL を使うコマンド(`gh pr list`、`gh pr view` など)が使えないことがある。`gh api` での書き込みはフックが拒否するので、書き込みは決められたスクリプトとコマンドだけで行う。
 
@@ -19,8 +19,8 @@ GitHub の情報は REST API(`gh api 'repos/{owner}/{repo}/...'`)だけで読む
 ### 1. 集める
 
 - `docs/feedback/LESSONS.md`: 回数が 2 以上で、状態が「記録のみ」の行。対象期間に追記・更新された行。
-- CI の失敗: `gh api "repos/{owner}/{repo}/actions/runs?status=failure&created=<7 日前の日付>..<今日の日付>&per_page=100"`(日付は YYYY-MM-DD) で失敗した実行を一覧し、各実行の失敗したジョブを `gh api 'repos/{owner}/{repo}/actions/runs/<id>/jobs'` で調べる(ログが要るときは `gh run view <id> --log-failed`)。どのステップ(フォーマット、lint、依存ルール、型、テスト、生成コード、ビルド)で、どの規則で落ちたかを数える。
-- レビューの指摘: `gh api "repos/{owner}/{repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100"` のうち、対象期間に `merged_at` がある PR について、次のうち「必須」とされたもの。
+- CI の失敗: `gh api 'repos/{owner}/{repo}/actions/runs?status=failure&created=<7 日前の日付>..<今日の日付>&per_page=100'`(日付は YYYY-MM-DD)で失敗した実行を一覧し、各実行の失敗したジョブを `gh api 'repos/{owner}/{repo}/actions/runs/<id>/jobs'` で調べる(ログが要るときは `gh run view <id> --log-failed`)。どのステップ(フォーマット、lint、依存ルール、型、テスト、生成コード、ビルド)で、どの規則で落ちたかを数える。
+- レビューの指摘: `gh api 'repos/{owner}/{repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100'` のうち、対象期間に `merged_at` がある PR について、次のうち「必須」とされたもの。
   - エージェントのレビュー: `gh api 'repos/{owner}/{repo}/issues/<番号>/comments'` のうち、`<!-- factory-review` で始まるコメント
   - 人のレビュー: `gh api 'repos/{owner}/{repo}/pulls/<番号>/comments'` と `gh api 'repos/{owner}/{repo}/pulls/<番号>/reviews'`
 
@@ -44,21 +44,21 @@ LESSONS.md の運用ルールの優先順位(型 → 依存ルール → lint �
 
 候補ごとに:
 
-1. `git switch -c factory/improve-<YYYYMMDD>-<短い名前>`
+1. `git fetch origin main` のあと、`git switch -c claude/factory-improve-<YYYYMMDD>-<短い名前> origin/main`(PR ごとに main から作り、前の PR の変更を含めない)
 2. 規則を変える。規則が実際に止めることを示すため、違反する例(依存ルールなら違反する import を含む fixture、lint なら違反するコード、型ならコンパイルが失敗する例を `// @ts-expect-error` で示すテスト)を足す。
 3. `make check` が通ることを確かめる。既存のコードが新しい規則に違反する場合は、PR を作らずに Issue にし、違反の箇所を列挙する。
 4. LESSONS.md の該当する行の状態を「昇格済み」にし、昇格先を書く。
 5. コミットし、`git push -u origin <ブランチ>` のあと、次のコマンドで下書き PR を作る。
 
    ```
-   scripts/factory/open-draft-pr.sh factory/improve-<YYYYMMDD>-<短い名前> "<タイトル>" <<'EOF'
+   scripts/factory/open-draft-pr.sh claude/factory-improve-<YYYYMMDD>-<短い名前> "<タイトル>" <<'EOF'
    (説明)
    EOF
    ```
 
 ### 5. 報告する
 
-最初に作った PR の説明(PR を作らなかった週は `open-issue.sh` で作る Issue)に、週次の報告を書く。
+すべての PR を作った後に、週次の報告を `open-issue.sh` で毎週 1 件の Issue にする(タイトルは「週次の報告 YYYY-MM-DD」)。作った PR の URL を含める。PR の説明は作った後に書き換えられないので、報告は PR に書かない。
 
 ```
 ## 週次の報告(YYYY-MM-DD 〜 YYYY-MM-DD)

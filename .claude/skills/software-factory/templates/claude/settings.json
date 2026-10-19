@@ -31,7 +31,11 @@
       "Bash(gh pr diff *)",
       "Bash(gh pr checks *)",
       "Bash(gh run list *)",
-      "Bash(gh run view *)"
+      "Bash(gh run view *)",
+      "Bash(make build)",
+      "Bash(make generate-check)",
+      "Bash(make outdated)",
+      "Bash(git log)"
     ],
     "ask": [
       "Bash(make add *)",

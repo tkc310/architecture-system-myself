@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# エージェントがファイルを編集した直後に、整形・lint・依存ルールを検査する。Claude Code の PostToolUse から呼ぶ。
+# エージェントがファイルを編集した直後に、整形し、lint と依存ルールを検査する。Claude Code の PostToolUse から呼ぶ。
 # 違反があれば終了コード 2 で理由を stderr に返し、エージェントに直させる。
 set -uo pipefail
 
@@ -8,7 +8,12 @@ path=$(jq -r '.tool_input.file_path // .tool_input.path // empty' 2>/dev/null)
 
 root="${CLAUDE_PROJECT_DIR:-$PWD}"
 cd "$root" || exit 0
-rel="${path#"$root"/}"
+# リポジトリの外のファイルは対象にしない
+case "$path" in
+  "$root"/*) rel="${path#"$root"/}" ;;
+  /*) exit 0 ;;
+  *) rel="$path" ;;
+esac
 
 case "$rel" in
   src/generated/*) exit 0 ;;

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# PreToolUse(Bash)。権限の規則は文字列の前方一致なので、パイプやサブシェルで包んだコマンドを取りこぼす。
+# PreToolUse(Bash)。権限の規則はコマンドの形の一致なので、bash -c、xargs、変数などで包んだコマンドを取りこぼす。
 # ここではコマンド全体を検査し、破壊的な操作は拒否(終了コード 2)、承認が要る操作は確認(ask)にする。
 # 無人のジョブ(FACTORY_JOB がある)では、さらにジョブごとの許可リストに合うコマンドだけを通す。
-# 規則を変えるときは references/guardrails.md と ARCHITECTURE.md の「編集制約」も更新する。
+# 規則を変えるときは、software-factory スキルの references/guardrails.md と ARCHITECTURE.md の「編集制約」も更新する。
 set -uo pipefail
 
 deny() {
@@ -56,7 +56,7 @@ has_i() { printf '%s\n%s' "$scan" "$scan_dq" | grep -Eiq -- "$1"; }
 has '(^|[;&|[:space:](])rm[[:space:]](.*[[:space:]])?(-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)([[:space:]]|$)' \
   && deny "再帰的な削除" "削除するファイルを列挙して人に確認する"
 has 'git[[:space:]]+push.*([[:space:]](--force|--force-with-lease|--force-if-includes|--mirror|--all|--delete)([=[:space:]]|$)|[[:space:]]-[a-zA-Z]*[fd][a-zA-Z]*([[:space:]]|$)|[[:space:]:]\+)' \
-  && deny "強制プッシュ、ブランチの削除、まとめてのプッシュ" "新しいコミットを積んで、対象のブランチだけを通常のプッシュをする"
+  && deny "強制プッシュ、ブランチの削除、まとめてのプッシュ" "新しいコミットを積んで、対象のブランチだけを通常どおりプッシュする"
 has 'git[[:space:]]+push.*[[:space:]:/](main|master)([[:space:]]|$)' \
   && deny "main への直接プッシュ" "ブランチを作って PR にする"
 has 'git[[:space:]]+(reset[[:space:]]+--hard|clean[[:space:]]+-[a-zA-Z]*f|checkout[[:space:]]+--[[:space:]]+\.|restore[[:space:]]+(.*[[:space:]])?\.([[:space:]]|$))' \
@@ -88,15 +88,15 @@ cmdpos='(^|[;&|(]|&&|\|\||\$\(|`|xargs[[:space:]]+|exec[[:space:]]+|env[[:space:
 if printf '%s\n' "$scan_nq" | grep -Eq -- "${cmdpos}((pnpm|pnpx|npx|npm|yarn|bun|bunx|corepack|vitest|oxlint|oxfmt|tsc|depcruise|playwright|lefthook|tsx|drizzle-kit|shadcn)([[:space:]]|$)|(\./)?node_modules/\.bin/|node[[:space:]]+scripts/)"; then
   deny "make を通さないコマンド" "Makefile のターゲットを使う(make help で一覧)。足りなければ、Makefile にターゲットを足すことを人に提案する"
 fi
-# make の呼び方を絞る。オプション(-f、-C、-e、--eval など)と、pkg= と name= 以外の変数の指定(SHELL= などでレシピを書き換えられる)を拒否する
+# make の呼び方を絞る。オプション(-f、-C、-e、--eval など)と、pkg=、name=、args= 以外の変数の指定(SHELL= などでレシピを書き換えられる)を拒否する
 if printf '%s\n' "$scan_nq" | grep -Eq -- "${cmdpos}(g?make)([[:space:]]|$)"; then
   printf '%s\n' "$scan_dq" | grep -Eq -- '(^|[[:space:]])(MAKE[A-Z_]*|GNUMAKEFLAGS)=' \
     && deny "make の動きを変える環境変数" "make <ターゲット> だけで叩く"
   printf '%s\n' "$scan_nq" | grep -Eq -- '(^|[[:space:];&|(])g?make([[:space:]]+[^;&|)]*)?[[:space:]]-' \
     && deny "make のオプション" "make <ターゲット> だけで叩く"
   printf '%s\n' "$scan" | grep -Eq -- '(^|[[:space:];&|(])g?make[[:space:]]([^;&|)]*[[:space:]])?([A-Za-z_.][A-Za-z0-9_.]*)=' \
-    && ! printf '%s\n' "$scan" | grep -Eq -- '(^|[[:space:];&|(])g?make[[:space:]]([^;&|)=]*[[:space:]])?((pkg|name)=('"'"'[^'"'"']*'"'"'|"[^"]*"|[^[:space:]]*)[[:space:]]*)+([^;&|)=]*)$' \
-    && deny "make の変数の指定(pkg= と name= 以外)" "値は pkg= か name= で渡す"
+    && ! printf '%s\n' "$scan" | grep -Eq -- '(^|[[:space:];&|(])g?make[[:space:]]([^;&|)=]*[[:space:]])?((pkg|name|args)=('"'"'[^'"'"']*'"'"'|"[^"]*"|[^[:space:]]*)[[:space:]]*)+([^;&|)=]*)$' \
+    && deny "make の変数の指定(pkg=、name=、args= 以外)" "値は pkg=、name=、args= で渡す"
 fi
 
 has '(kubectl|helm)[[:space:]]+(apply|delete|upgrade|install)|terraform[[:space:]]+(apply|destroy)|(vercel|netlify|flyctl|fly|wrangler)[[:space:]].*(deploy|--prod)' \
@@ -178,8 +178,8 @@ if [ -n "${FACTORY_JOB:-}" ]; then
   ref='[A-Za-z0-9._/-]+'
   common="git (diff|log|show|status|rev-parse)( .*)?|git fetch origin ${ref}|gh api (-H Q )?Q( .*)?|gh api (-H Q )?repos/[^ ]+( .*)?|gh run (list|view)( .*)?|(cat|ls|head|tail|wc|jq|grep|date|echo|pwd)( .*)?"
   case "$FACTORY_JOB" in
-    review)  allowed="${common}|git checkout --detach (FETCH_HEAD|${ref})|(\./)?scripts/factory/post-review\.sh [0-9]+ (approve|changes)" ;;
-    improve) allowed="${common}|git switch (-c )?factory/improve-[A-Za-z0-9._-]+|git add( -A)?( [^ -][^ ]*)*|git commit (-m Q|-F -)|git push -u origin factory/improve-[A-Za-z0-9._-]+|make (check|check-versions|lint|lint-deps|test|format)|(\./)?scripts/factory/(open-draft-pr\.sh factory/improve-[A-Za-z0-9._-]+ Q|open-issue\.sh Q)" ;;
+    review)  allowed="${common}|(\./)?scripts/factory/post-review\.sh [0-9]+ [0-9a-f]{40} (approve|changes)" ;;
+    improve) allowed="${common}|git switch -c claude/factory-improve-[A-Za-z0-9._-]+ origin/main|git switch (main|claude/factory-improve-[A-Za-z0-9._-]+)|git add( -A)?( [^ -][^ ]*)*|git commit (-m Q|-F -)|git push -u origin claude/factory-improve-[A-Za-z0-9._-]+|make (check|check-versions|lint|lint-deps|test|format)|(\./)?scripts/factory/(open-draft-pr\.sh claude/factory-improve-[A-Za-z0-9._-]+ Q|open-issue\.sh Q)" ;;
     *) deny "不明な FACTORY_JOB(${FACTORY_JOB})" "review か improve を設定する" ;;
   esac
   printf '%s' "$unq" | grep -Eq -- "^(${allowed})$" \

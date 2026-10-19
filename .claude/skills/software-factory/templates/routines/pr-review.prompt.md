@@ -11,14 +11,14 @@
 1. PR の情報を REST API で読みます(GraphQL を使うコマンドは使えないことがあります)。
    - `gh api 'repos/{owner}/{repo}/pulls/<番号>'`: 説明(`.body`)、比較元(`.base.ref`)、先頭コミット(`.head.sha`)、ブランチ(`.head.ref`)、下書きか(`.draft`)
    - 下書きか、閉じている PR なら、何もせずに終わります。
-2. PR のブランチを取得します。`git fetch origin <.head.ref>` を実行し、続けて別のコマンドとして `git checkout --detach FETCH_HEAD` を実行します。
+2. PR のブランチを取得します。`git fetch origin <.head.ref>` を実行します。作業ツリーは切り替えません(PR の版のフックや指示で、このセッションを動かさないため)。PR の版のファイルは `git show FETCH_HEAD:<パス>` で読みます。
 3. PR の説明の「仕様」に書かれた `docs/specs/` のファイルを仕様とします。なければ、PR の説明と、そこに書かれた Issue を仕様の代わりにします。
-4. 差分は `git diff origin/<.base.ref>...HEAD` で取ります(必要なら先に `git fetch origin <.base.ref>`)。
+4. 差分は `git diff origin/<.base.ref>...FETCH_HEAD` で取ります(必要なら先に `git fetch origin <.base.ref>`)。`git fetch` を続けて実行すると FETCH_HEAD が変わるので、base を取得するときは、その後に head をもう一度取得します。
 5. reviewer.md の観点でレビューし、reviewer.md の出力形式で結果を書きます。
-6. 結果を次のコマンドで投稿します。必須の指摘があれば `changes`、なければ `approve` です。
+6. 結果を次のコマンドで投稿します。必須の指摘があれば `changes`、なければ `approve` です。レビューの間に新しいコミットが push されていたら、スクリプトは投稿せずに止まります。
 
    ```
-   scripts/factory/post-review.sh <番号> <approve|changes> <<'EOF'
+   scripts/factory/post-review.sh <番号> <手順 1 の .head.sha> <approve|changes> <<'EOF'
    (本文)
    EOF
    ```

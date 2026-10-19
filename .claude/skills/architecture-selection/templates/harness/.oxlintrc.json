@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "import", "promise", "vitest"],
+  "plugins": ["typescript", "unicorn", "oxc", "import", "promise", "vitest"],
   "categories": {
     "correctness": "error",
     "suspicious": "warn"
@@ -17,7 +17,6 @@
     "typescript/no-non-null-assertion": "error",
     "typescript/consistent-type-imports": "error",
     "typescript/no-floating-promises": "error",
-    "import/no-cycle": "error",
     "eqeqeq": "error",
     "no-console": "warn"
   },

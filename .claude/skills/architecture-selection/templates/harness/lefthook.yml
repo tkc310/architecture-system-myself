@@ -1,6 +1,7 @@
 # 手元のコミットを止める。--no-verify で回避できるので、CI の代わりにはならない。
 pre-commit:
-  parallel: true
+  # 整形(stage_fixed で書き戻す)が終わってから lint を掛けるため、順に実行する
+  piped: true
   commands:
     format:
       glob: "*.{ts,tsx,js,jsx,json,jsonc,md,css}"

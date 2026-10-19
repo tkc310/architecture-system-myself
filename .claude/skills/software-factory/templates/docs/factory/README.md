@@ -14,11 +14,11 @@ Issue → /spec → [人が承認] → /build → /review → PR → GitHub 側�
 | 承認 | — | 人 | 仕様の状態を「承認」に |
 | 3〜4 実装と検証 | `/build <仕様のパス>` | implementer、フック | ブランチ、コミット |
 | 5 独立レビュー | `/review <仕様のパス>` | reviewer | 必須 / 推奨の指摘 |
-| PR | `/build` の最後 | implementer(人が確認) | PR |
+| PR | `/build` の最後 | `/build`(人が確認) | PR |
 | GitHub 側の検査 | 自動 | 品質ゲート、secrets-scan、エージェントのレビュー([形式 A: GitHub Actions / 形式 B: ルーティン]) | 必須チェック、レビューコメント、`factory/review` |
 | 6 振り返り | `/retro <PR 番号>` | retro | `docs/feedback/LESSONS.md` の追記(同じ PR) |
 | 7 マージ | — | 人 | main |
-| 週次の改善 | 自動(毎週月曜) | [形式 A: factory-improve.yml / 形式 B: ルーティン factory-improve] | 下書き PR と週次の報告 |
+| 週次の改善 | 自動(毎週月曜) | [形式 A: factory-improve.yml / 形式 B: ルーティン factory-improve] | 下書き PR と、週次の報告の Issue |
 
 ## 準備完了の定義
 
@@ -60,5 +60,5 @@ Issue → /spec → [人が承認] → /build → /review → PR → GitHub 側�
 ## 運用の前提
 
 - 実行の形式: [形式 A: GitHub Actions + API キー(シークレット `ANTHROPIC_API_KEY`) / 形式 B: lefthook + ルーティン(サブスクリプション。設定は software-factory スキルの `templates/routines/README.md`)]
-- ブランチ保護(ルールセット)で、品質ゲートの 6 ステージ、`secrets-scan`、`factory/review` を必須チェックにし、コードオーナーのレビューを必須にする。迂回を許すリストは空にする。
+- ブランチ保護(ルールセット)で、品質ゲート(`ci` のジョブ `check`)、`secrets-scan`、`factory/review` を必須チェックにし、コードオーナーのレビューを必須にする。迂回を許すリストは空にする。
 - 形式 B で `factory/review` が付かないとき(GitHub イベントの上限など)は、ルーティン `factory-review` の Run now に PR 番号を書いて実行し直す。

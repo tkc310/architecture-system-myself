@@ -1,6 +1,7 @@
 {
-  "//": "package.json の scripts と devDependencies に統合し、このファイルは置かない。scripts は Makefile から呼ぶ実装で、直接は叩かない(make check など)。devDependencies は導入時に pnpm add -D で最新の安定版を入れ、check:versions で確かめる。oxfmt は exact で固定する(pnpm add -D -E oxfmt)。packageManager(例: \"pnpm@<版>\"。最新の安定版)と engines.pnpm(\">=10.21.0\"。trustPolicy が効く版)も package.json に書く(pnpm/action-setup は packageManager の版を使う。古い pnpm は trustPolicy を黙って無視する)。",
+  "//": "package.json に統合し、このファイルは置かない。scripts は Makefile から呼ぶ実装で、直接は叩かない。devDependencies の入れ方と package.json に足す項目は README.md の「置き方」にある。",
   "scripts": {
+    "dev": "echo \"開発サーバーのコマンドをここに書く\"",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "lint": "oxlint",
@@ -11,10 +12,9 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "generate": "echo \"生成コマンド(openapi-typescript、drizzle-kit など)をここに書く\"",
-    "generate:check": "pnpm generate && git diff --exit-code -- src/generated",
+    "generate:check": "pnpm generate && git add -N src/generated && git diff --exit-code -- src/generated",
     "build": "echo \"ビルドコマンドをここに書く\"",
-    "check": "pnpm format:check && pnpm lint && pnpm lint:deps && pnpm typecheck && pnpm test",
-    "check:versions": "node scripts/check-versions.mjs"
+    "check": "pnpm format:check && pnpm lint && pnpm lint:deps && pnpm typecheck && pnpm test"
   },
   "devDependencies": [
     "typescript",
@@ -25,6 +25,7 @@
     "vitest",
     "@vitest/coverage-v8",
     "@testing-library/react",
+    "@testing-library/dom",
     "happy-dom",
     "@playwright/test",
     "lefthook"

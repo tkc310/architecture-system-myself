@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # 保護パスへの書き込みと削除を拒否する。Cursor の preToolUse と Claude Code の PreToolUse の両方から呼ぶ。
 # 標準入力の JSON から対象のパスを取り出し、保護パスに当たれば終了コード 2 で止める。
-# 保護パスを変えるときは references/editing-constraints.md と ARCHITECTURE.md も更新する。
+# 保護パスを変えるときは、.github/CODEOWNERS と ARCHITECTURE.md の「編集制約」も更新する。
 set -uo pipefail
+# パスの * や [ ] を glob として展開させない(展開されると正規化の結果がずれ、保護パスを避けられる)。macOS の bash 3.2 でも効くよう全体で切る
+set -f
 
 block() {
   printf '%s\n' "$1" >&2
@@ -62,13 +64,21 @@ if [ "${FACTORY_JOB:-}" = "improve" ]; then
 fi
 
 case "$rel" in
-  db/migrations/*|src/shared/auth/*|src/generated/*|\
-  infra/*|.github/*|Dockerfile|.env|.env.*|\
+  src/generated/*)
+    printf '%s は生成コードです。手で編集せず、生成元を直して make generate を実行してください。\n' "$rel" >&2
+    exit 2
+    ;;
+esac
+
+case "$rel" in
+  db/migrations/*|src/shared/auth/*|\
+  infra/*|.github/*|Dockerfile|.env|.env.*|*/.env|*/.env.*|\
   package.json|pnpm-lock.yaml|package-lock.json|yarn.lock|.npmrc|pnpm-workspace.yaml|\
   .cursor/*|.claude/*|scripts/guard-paths.sh|scripts/check-edited-file.sh|lefthook.yml|\
   Makefile|makefile|GNUmakefile|*.mk|\
+  tsconfig.json|vitest.config.ts|.oxfmtrc.json|\
   .dependency-cruiser.cjs|.oxlintrc.json|CODEOWNERS|AGENTS.md|CLAUDE.md|docs/factory/*|scripts/factory/*|.git/*)
-    printf '%s は保護パスです。編集する前にユーザーの明示的な許可を得てください(references/editing-constraints.md)。生成コードは生成元を直してください。\n' "$rel" >&2
+    printf '%s は保護パスです。編集する前にユーザーの明示的な許可を得てください(ARCHITECTURE.md の「編集制約」)。\n' "$rel" >&2
     exit 2
     ;;
 esac

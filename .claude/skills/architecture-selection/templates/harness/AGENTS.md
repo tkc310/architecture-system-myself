@@ -15,14 +15,18 @@
 
 | 目的 | コマンド |
 | --- | --- |
+| 初回の準備 / 依存を入れる | `make setup` / `make install` |
+| 開発サーバー | `make dev` |
 | 完了前に必ず通す | `make check` |
 | 整形 | `make format` |
 | lint / 依存ルール | `make lint` / `make lint-deps` |
 | 型チェック | `make typecheck` |
 | テスト | `make test` |
 | E2E(手動) | `make test-e2e` |
+| 生成コードの更新(スキーマや契約を変えた後) | `make generate` |
 | 依存の追加と削除(承認が要る) | `make add pkg="<名前>"` / `make add-dev pkg="<名前>"` / `make remove pkg="<名前>"` |
 | 版の鮮度 | `make check-versions` |
+| デザインシステムの部品の取り込み(承認が要る。使うときだけ) | `make ui-add name="<名前>"` / `make ui-update name="<名前>"` |
 
 ## 作業の進め方
 

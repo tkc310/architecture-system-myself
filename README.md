@@ -4,7 +4,7 @@ AI 駆動開発で使い回すための、設計と開発工程のボイラー�
 
 - フルスタック TypeScript を既定とし、性能が足りないと測定で分かったときだけ Effect → Worker → WebAssembly → Go の順に進む
 - 構造は、開発人数・業務領域の数・業務ルールの複雑さで S / M / L の 3 段階から選ぶ。シンプルな CRUD にドメイン層もリポジトリ層も作らない
-- 画面があるときは、デザインシステムを「[8341-ui](https://github.com/tkc310/8341ui) を使わない / 使う / 8341-ui をひな形に作る」から選ぶ
+- 画面があるときは、デザインシステムを「[8341-ui](https://github.com/tkc310/8341-ui) を使わない / 使う / 8341-ui をひな形に作る」から選ぶ
 - 境界は文章ではなく、型・oxlint・dependency-cruiser・テスト・フックで機械的に守る
 - コマンドの入口は `Makefile` に一つにし、人もエージェントも CI も `make` で叩く
 - 依存の供給網は、既定で pnpm の `trustPolicy: no-downgrade` と [Takumi Guard](https://shisho.dev/docs/t/guard/quickstart/npm/) のレジストリで守る
@@ -76,7 +76,7 @@ cp -r .claude/skills/architecture-selection .claude/skills/software-factory <対
 - ブランチ保護(必須チェック、コードオーナーのレビュー、迂回の禁止)
 - Claude の GitHub アプリの導入
 
-手順は、生成された `docs/factory/README.md` と、スキルの `templates/README.md` にある。
+手順は、生成された `docs/factory/README.md` と、software-factory の `templates/README.md` にある。
 
 ### 4. 工場で開発する
 
@@ -98,10 +98,10 @@ cp -r .claude/skills/architecture-selection .claude/skills/software-factory <対
 
 [architecture-selection](.claude/skills/architecture-selection/SKILL.md) は、ヒアリングから ARCHITECTURE.md、ディレクトリ構成、ハーネスの雛形、ADR までを出力する。既存の ARCHITECTURE.md の調整と、コードベースの構造レビューにも使う。
 
-| 段階 | 形 | 向いている案件 |
+| 段階 | 形 | 典型的な案件 |
 | --- | --- | --- |
 | S: slice | `features/` の Vertical Slice + CQS。層なし | 1〜2 人、CRUD 中心、仕様変更が少ない |
-| M: modular | `modules/` + 公開 API + テーブルの所有。層なし | 3 人以上、または業務領域が 3 つ以上。ルールは単純 |
+| M: modular | `modules/` + 公開 API + テーブルの所有。層なし | 3 人以上、または業務領域が 3 つ以上 |
 | L: layered | `modules/` + domain / application / infrastructure | 4 人以上 かつ 複雑なドメインロジック かつ 仕様変更が頻繁 |
 
 [software-factory](.claude/skills/software-factory/SKILL.md) は、architecture-selection の出力の上に、Claude Code 向けのソフトウェアファクトリーを載せる。
@@ -139,7 +139,7 @@ cp -r .claude/skills/architecture-selection .claude/skills/software-factory <対
     ├── ARCHITECTURE.md
     ├── adr.md
     ├── module-AGENTS.md
-    └── harness/                # oxlint / oxfmt / dependency-cruiser(S・M・L)/ Vitest / lefthook / CI / CODEOWNERS / Claude Code と Cursor のフック
+    └── harness/                # Makefile / AGENTS.md / oxlint / oxfmt / dependency-cruiser(S・M・L)/ Vitest / lefthook / CI / CODEOWNERS / 供給網(.npmrc、pnpm-workspace.yaml)/ 版の確認 / Claude Code と Cursor のフック
 
 .claude/skills/software-factory/
 ├── SKILL.md

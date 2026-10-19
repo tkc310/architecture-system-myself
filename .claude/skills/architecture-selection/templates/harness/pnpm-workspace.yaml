@@ -1,5 +1,6 @@
-# 依存の供給網の対策(references/security.md の「依存の供給網」)。保護パス。設定を外すときは ADR と承認が要る。
-# pnpm 10.21 以上が必要(package.json の packageManager と engines.pnpm で固定する)。
+# 依存の供給網の対策(ARCHITECTURE.md の「技術スタック」と、architecture-selection スキルの references/security.md)。
+# 保護パス。外すときは ADR と承認が要る。make install と make add は、これらが残っているかを先に確かめる。
+# pnpm 10.21 以上が必要(package.json の packageManager で版を固定し、engines.pnpm で下限を示す)。
 # 単一パッケージのリポジトリでも、pnpm の設定を置くためにこのファイルを置く。モノレポなら packages を足す。
 
 # 前の版より信頼の度合い(trusted publisher、provenance)が下がった版を入れない。
@@ -10,6 +11,10 @@ trustPolicy: no-downgrade
 # 足すときは、公開元の告知で理由を確かめ、ADR に書いて承認を得る。名前だけの指定はしない。
 trustPolicyExclude: []
 
-# 次の 2 つは pnpm 11 以降の既定値で有効。無効にしない。
-# - minimumReleaseAge: 1440(公開から 24 時間たっていない版を入れない)
-# - blockExoticSubdeps: true(間接依存が git や tarball の URL から入るのを止める)
+# 公開から 24 時間(分で指定)たっていない版を入れない。
+minimumReleaseAge: 1440
+
+# 間接依存が git や tarball の URL から入るのを止める。
+blockExoticSubdeps: true
+
+# 上の 2 つは pnpm 11 では既定値だが、pnpm 10 では無効なので明示する。無効にしない。

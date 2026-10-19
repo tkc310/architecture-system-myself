@@ -12,9 +12,9 @@
 //      - 版を固定した URL(/r/v<版>/)なら、そのリポジトリの最新のリリースと比べる。固定していなければ知らせる
 //
 // 使い方:
-//   make check-versions                        # (= node scripts/check-versions.mjs)結果を表で出す。古いものがあれば終了コード 1
-//   node scripts/check-versions.mjs --json     # JSON で出す
-//   node scripts/check-versions.mjs --no-actions --no-node --no-registries
+//   make check-versions                        # 結果を表で出す。古いものがあれば終了コード 1
+//   make check-versions args="--json"          # JSON で出す
+//   make check-versions args="--no-actions --no-node --no-registries"
 //
 // 環境変数:
 //   NPM_REGISTRY   npm のレジストリ(既定は npm config の registry、なければ https://registry.npmjs.org)
@@ -178,8 +178,10 @@ async function checkNode() {
     if (!spec) return add('node', 'Node.js', cur.spec, label, 'ok', `${cur.where}。常に最新の LTS`);
     const want = parse(spec);
     let status;
-    if (/^[>^~]/.test(spec)) status = rangeAllows(spec, latest) ? 'ok' : 'outdated';
-    else status = want && want.major === latest.major && cmp(want, latest) >= 0 ? 'ok' : 'outdated';
+    if (/^lts\//i.test(spec)) status = spec.slice(4).toLowerCase() === String(lts.lts).toLowerCase() ? 'ok' : 'outdated';
+    else if (/^[>^~]/.test(spec) || /^\d+(\.\d+)?(\.(x|\*))?$/.test(spec)) status = rangeAllows(spec, latest) ? 'ok' : 'outdated';
+    else if (!want) status = 'unknown';
+    else status = want.major === latest.major && cmp(want, latest) >= 0 ? 'ok' : 'outdated';
     add('node', 'Node.js', cur.spec, label, status, cur.where);
   } catch (e) {
     add('node', 'Node.js', cur?.spec ?? '(指定なし)', '?', 'error', `取得できない(${e.message})`);

@@ -19,7 +19,7 @@
 | API を分ける場合 | Hono、Fastify | 依存が少なく、スキーマ検証と組み合わせやすい |
 | DB アクセス | Drizzle、Prisma、Kysely | 型付きのクエリを書ける |
 | 検証 | Zod | スキーマから型を導出できる |
-| デザインシステム | 8341-ui を使わない / 使う / 作る | 画面があるときに選ぶ。[デザインシステムの選択](./design-system.md) |
+| デザインシステム | 8341-ui を使わない / 使う / 作って共有する / カスタマイズして組み込む | 画面があるときに選ぶ。[デザインシステムの選択](./design-system.md) |
 | テスト | Vitest、Testing Library、Playwright | ユニットから E2E まで TypeScript で書ける |
 | ジョブ | BullMQ | Redis でキューと再試行を扱える |
 | I/O の並行処理 | Effect | Fiber による構造化された並行処理で、並行数の上限、タイムアウト、キャンセル、再試行を型付きで書ける。[性能対策の段階](./performance-ladder.md) の段階 2 に進んだときだけ採用する |

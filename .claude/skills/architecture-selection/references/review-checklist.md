@@ -16,13 +16,13 @@
 - [ ] 既定から外した項目には、測定の結果か要件上の理由がある
 - [ ] 性能対策の段階を上げた場合、各段階の根拠(測定結果か測定の計画)がある
 - [ ] 段階 4 以上と、oxlint・oxfmt 以外の Oxc ツールの採用は、ユーザーに確認した
-- [ ] 画面があるとき、デザインシステムの選択(A / B / C)と理由が ADR にある。B と C では、レジストリの URL と名前空間を導入時に確かめ、DESIGN.md を置き、取り込んだ部品の置き場所を保護パスにした
+- [ ] 画面があるとき、デザインシステムの選択(A / B / C / D)と理由が ADR にある。B と C では、レジストリの URL と名前空間を導入時に確かめ、DESIGN.md を置き、取り込んだ部品の置き場所を保護パスにした。D では、ワークスペースもリポジトリも作らず、部品を `src/components/ui/`、トークンを `src/styles/foundation/` に置き、生成物をコミットして `ds-check` を `check` に含め、生成物を保護パスにした
 - [ ] C を選んだとき、新しいリポジトリを作る前にユーザーの承認を得た
 - [ ] Effect を使う場合、範囲が段階 2 の対象に限られ、公開 API に Effect の型が出ていない
 
 ## 構造とハーネス
 - [ ] ディレクトリ構成と `.dependency-cruiser.cjs` の段階が一致している
-- [ ] 画面があるとき、`ui/` が [コンポーネントの構造](./component-structure.md) に沿っている(PascalCase のディレクトリ、`index.tsx`、親子の入れ子、`shared/ui/` と `shared/ui/ds/` の分け方)
+- [ ] 画面があるとき、`ui/` が [コンポーネントの構造](./component-structure.md) に沿っている(PascalCase のディレクトリ、`index.tsx`、親子の入れ子、`shared/ui/` と `shared/ui/ds/`、D のときは `components/ui/` の分け方)
 - [ ] 各モジュール(S では feature)に `README.md` がある。M と L では加えて `AGENTS.md` と、所有するテーブルの一覧がある
 - [ ] 空の雛形で `make check` が通る
 - [ ] 境界違反のファイルを置くと `make lint-deps` が失敗する(確認後に削除した)

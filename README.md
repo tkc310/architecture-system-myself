@@ -4,7 +4,7 @@ AI 駆動開発で使い回すための、設計と開発工程のボイラー�
 
 - フルスタック TypeScript を既定とし、性能が足りないと測定で分かったときだけ Effect → Worker → WebAssembly → Go の順に進む
 - 構造は、開発人数・業務領域の数・業務ルールの複雑さで S / M / L の 3 段階から選ぶ。シンプルな CRUD にドメイン層もリポジトリ層も作らない
-- 画面があるときは、デザインシステムを「[8341-ui](https://github.com/tkc310/8341-ui) を使わない / 使う / 8341-ui をひな形に作る」から選ぶ
+- 画面があるときは、デザインシステムを「[8341-ui](https://github.com/tkc310/8341-ui) を使わない / 使う / ひな形に作って共有する / カスタマイズしてプロダクトに組み込む」から選ぶ
 - 境界は文章ではなく、型・oxlint・dependency-cruiser・テスト・フックで機械的に守る
 - コマンドの入口は `Makefile` に一つにし、人もエージェントも CI も `make` で叩く
 - 依存の供給網は、既定で pnpm の `trustPolicy: no-downgrade` と [Takumi Guard](https://shisho.dev/docs/t/guard/quickstart/npm/) のレジストリで守る
@@ -51,7 +51,8 @@ cp -r .claude/skills/architecture-selection .claude/skills/software-factory <対
 | --- | --- |
 | A. 8341-ui を使わない | 組織の既存のデザインシステムか、画面のフレームワークの標準的な部品を使う |
 | B. 8341-ui を使う | 8341-ui の部品とトークンを shadcn のレジストリで取り込み、DESIGN.md を置く |
-| C. デザインシステムを作る | 8341-ui のリポジトリで `/ds-factory` を実行して専用のデザインシステムを作り(新しいリポジトリを作るので、事前に承認を求められる)、B と同じ方法で取り込む |
+| C. デザインシステムを作って共有する | 8341-ui のリポジトリで `/ds-factory` を実行して組織のデザインシステムを作り(新しいリポジトリを作るので、事前に承認を求められる)、B と同じ方法で取り込む |
+| D. カスタマイズして組み込む | `/ds-factory` で色調などを変えたデザインシステムを生成し、リポジトリもワークスペースも作らずに、部品を `src/components/ui/`、トークンと土台を `src/styles/foundation/` に写す。トークンの生成物はコミットし、`ds-check` で鮮度とコントラストを検査する |
 
 既存の ARCHITECTURE.md を見直すときは「ARCHITECTURE.md を調整して」、構造を点検するときは「このリポジトリの構造をレビューして」と頼む。
 
@@ -127,7 +128,7 @@ cp -r .claude/skills/architecture-selection .claude/skills/software-factory <対
 │   ├── scale-selection.md      # S / M / L の判定と昇格・降格
 │   ├── tech-selection.md       # 技術選定と Go・Flutter の条件
 │   ├── performance-ladder.md   # 性能対策の段階
-│   ├── design-system.md        # デザインシステムの選択(8341-ui を使わない / 使う / 作る)
+│   ├── design-system.md        # デザインシステムの選択(8341-ui を使わない / 使う / 作って共有する / 組み込む)
 │   ├── principles.md           # 段階別の構造と依存ルール
 │   ├── component-structure.md  # 画面のコンポーネントの置き場所、名前、入れ子、import
 │   ├── cqs.md                  # コマンドとクエリ

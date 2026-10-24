@@ -8,7 +8,7 @@
 
 | 雛形 | 置き場所 | 手順 |
 | --- | --- | --- |
-| `Makefile` | リポジトリ直下 | コマンドの入口([規約](../../references/coding-conventions.md#コマンドは-make-で叩く))。採らないターゲット(デザインシステムを使わないなら `ui-*`)は消す。よく使うターゲットは AGENTS.md のコマンドの表にも書く |
+| `Makefile` | リポジトリ直下 | コマンドの入口([規約](../../references/coding-conventions.md#コマンドは-make-で叩く))。採らないターゲット(デザインシステムの B / C を使わないなら `ui-*`)は消す。D を選んだら `ds-generate` と `ds-check` を足し、`check` に `ds-check` を含める([デザインシステム](../../references/design-system.md#ハーネスに足すもの))。よく使うターゲットは AGENTS.md のコマンドの表にも書く |
 | `AGENTS.md`、`CLAUDE.md` | リポジトリ直下 | 角括弧を埋める。`CLAUDE.md` は `@AGENTS.md` を読み込むだけ |
 | `pnpm-workspace.yaml`、`.npmrc` | リポジトリ直下 | 依存の供給網の対策(`trustPolicy: no-downgrade`、`minimumReleaseAge`、`blockExoticSubdeps`、Takumi Guard)。依存を入れる前に、そのまま置く。モノレポなら `pnpm-workspace.yaml` に `packages` を足す。どちらにもトークンを書かない([セキュリティ](../../references/security.md#依存の供給網)) |
 | `package.scripts.json` | `package.json` | 下の「package.json の作り方」に従う。ファイル自体は置かない |

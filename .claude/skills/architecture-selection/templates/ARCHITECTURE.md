@@ -36,7 +36,7 @@
 | Web | | |
 | DB / DB アクセス | PostgreSQL / | |
 | 検証 / テスト | Zod / Vitest | 既定 |
-| デザインシステム | [画面なし / A: 8341-ui を使わない(使うもの: ) / B: 8341-ui / C: 作ったデザインシステム(リポジトリ: )] | [理由。B と C はレジストリの URL と名前空間、DESIGN.md の場所] |
+| デザインシステム | [画面なし / A: 8341-ui を使わない(使うもの: ) / B: 8341-ui / C: 作ったデザインシステム(リポジトリ: ) / D: 8341-ui をカスタマイズして組み込み(ひな形のコミット: )] | [理由。B と C はレジストリの URL と名前空間、DESIGN.md の場所。D は変えたもの、置き場所(`src/components/ui/`、`src/styles/foundation/`)、外したもの] |
 | lint / format | oxlint / oxfmt | 既定 |
 | 依存ルール | dependency-cruiser | 既定 |
 | エラー処理 | [判別可能なユニオン / neverthrow] | [理由] |

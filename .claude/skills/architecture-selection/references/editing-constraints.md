@@ -33,6 +33,7 @@
 | `Makefile`(と `makefile`、`GNUmakefile`、`*.mk`) | コマンドの入口。`make check` の中身を変えると、完了の条件と CI が弱まる([規約](./coding-conventions.md#コマンドは-make-で叩く)) |
 | `.npmrc`、`pnpm-workspace.yaml` | 依存の取得元(Takumi Guard)と供給網の検査(`trustPolicy` など)を外せる([セキュリティ](./security.md#依存の供給網)) |
 | `src/shared/ui/ds/**`(デザインシステムの B / C を選んだとき) | 取り込んだ部品を手で書き換えると、取り込み直したときに消え、デザインシステムの検証からも外れる([デザインシステム](./design-system.md)) |
+| `src/styles/foundation/` の生成物(`tokens.css`、`tailwind-theme.css`、`tokens.json`、`tw-merge-config.ts`、`tokens/primitive/color.tokens.json`)と `tokens/contrast.rules.json`(デザインシステムの D を選んだとき) | 生成物を手で直すと元と食い違う。コントラストの基準を緩めるとアクセシビリティの検証が弱まる([デザインシステム](./design-system.md#d-8341-ui-をカスタマイズしてプロダクトに組み込む)) |
 | `.cursor/**`、`.claude/**`(設定、エージェントの役割、フック、コマンド)、`scripts/guard-paths.sh`、`scripts/check-edited-file.sh`、`lefthook.yml`、`.dependency-cruiser.cjs`、`.oxlintrc.json`、`CODEOWNERS`、`AGENTS.md`、`CLAUDE.md`、`docs/factory/**`、`scripts/factory/**`、`.git/**` | ガードレール自体を弱める変更になりうる。週次の改善ジョブ(GitHub Actions かルーティン)だけは、規則を強める下書き PR のために `.dependency-cruiser.cjs`、`.oxlintrc.json`、`AGENTS.md` を編集できる |
 
 - 保護パスは、指示(Cursor ルール、AGENTS.md)だけで守らない。下の表の、強制する仕組みのうち二つ以上で守る。雛形では、エージェントのフック(`scripts/guard-paths.sh`)と CODEOWNERS + ブランチ保護の二つで守るので、この表のパスは両方に書く。

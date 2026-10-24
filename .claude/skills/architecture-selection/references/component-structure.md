@@ -8,8 +8,10 @@
 
 | 置き場所 | 置くもの | import してよい先 |
 | --- | --- | --- |
-| `src/shared/ui/` | どの画面でも使う共通の部品 | `src/shared/ui/` と `src/shared/lib/` だけ |
+| `src/shared/ui/` | どの画面でも使う共通の部品 | `src/shared/ui/` と `src/shared/lib/` だけ(D のときは `src/components/ui/` と `src/styles/foundation/` も) |
 | `src/shared/ui/ds/` | デザインシステムから取り込んだ部品([デザインシステム](./design-system.md) の B / C)。手で編集しない | 取り込んだときのまま |
+| `src/components/ui/` | プロダクトに組み込んだデザインシステムの部品([デザインシステム](./design-system.md) の D)。題材に依らない部品だけ | ほかの部品と `src/styles/foundation/` だけ |
+| `src/styles/foundation/` | D のトークン(元と生成物)と、部品が共有する処理(`tv`、フォーカス表示) | `src/styles/foundation/` だけ |
 | `src/shared/layouts/` | 全画面に共通する枠(ヘッダー、パンくずリスト)。ルーターに依存してよい | `src/shared/` |
 | `<feature>/ui/`(M と L は `<module>/ui/`) | その feature の画面と、画面だけが使う部品。`app/` のルートから描く | 同じ feature の `ui/` と `index.ts`、`src/shared/ui/`、`src/shared/lib/` |
 
@@ -77,6 +79,7 @@ src/features/skill-sheet/ui/
 
 - デザインシステムを使うとき(B / C)、取り込んだ部品は `src/shared/ui/ds/` に置き、取り込んだときの名前のまま使う(shadcn の部品は kebab-case のファイル)。この文書の名前の規則は、自分で書く部品にだけ適用する。
 - 取り込んだ部品の見た目や振る舞いを変えたいときは、`src/shared/ui/` に PascalCase のディレクトリで包む部品を作る。
+- D のとき、部品は `src/components/ui/<Name>/` に置き、この文書の名前の規則(PascalCase、`index.tsx`)に従う。部品は自分たちのコードなので、直接直してよい。直したら `ds-check` を通す。題材に依る部品(このプロダクトでしか意味を持たないもの)は `src/components/ui/` に置かず、`src/shared/ui/` か feature の `ui/` に置く。
 
 ## 確認すること
 

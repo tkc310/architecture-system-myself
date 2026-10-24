@@ -1,6 +1,6 @@
 ---
 name: architecture-selection
-description: 新規サービスのアーキテクチャと技術スタックを選定し、ARCHITECTURE.md・ディレクトリ構成・ハーネス雛形(型/lint/依存ルール/テスト/フック)・ADRを出力する。既存の ARCHITECTURE.md の調整や、コードベースの構造レビューにも使う。フルスタックTypeScriptを既定とし、構造を規模でS/M/Lの3段階から選び、性能要件があるときだけ Effect / Worker / WebAssembly / Go の順に検討する。画面があるときはデザインシステムを 8341-ui を使わない / 使う / 作る から選ぶ。Use when choosing architecture or tech stack, scaffolding a codebase for AI-driven development, or reviewing a codebase's structure.
+description: 新規サービスのアーキテクチャと技術スタックを選定し、ARCHITECTURE.md・ディレクトリ構成・ハーネス雛形(型/lint/依存ルール/テスト/フック)・ADRを出力する。既存の ARCHITECTURE.md の調整や、コードベースの構造レビューにも使う。フルスタックTypeScriptを既定とし、構造を規模でS/M/Lの3段階から選び、性能要件があるときだけ Effect / Worker / WebAssembly / Go の順に検討する。画面があるときはデザインシステムを 8341-ui を使わない / 使う / 作って共有する / カスタマイズしてプロダクトに組み込む から選ぶ。Use when choosing architecture or tech stack, scaffolding a codebase for AI-driven development, or reviewing a codebase's structure.
 ---
 
 # アーキテクチャ選定スキル
@@ -31,7 +31,7 @@ ARCHITECTURE.md には採った値と外した理由だけを書き、ルール�
 2. **構造の段階**(`references/scale-selection.md`)。S / M / L を判定する。境界上でどちらも同程度に妥当なときは、ユーザーに確認する。
 3. **技術スタック**(`references/tech-selection.md`)。既定から外れる項目を決める。採用するライブラリは、公式ドキュメントで現行のリリースと導入手順を確認してから書く。記憶で版や設定を書かない。依存は `make add pkg="<名前>"`(中身は `pnpm add`)で最新の安定版を入れ、プレリリース(`-rc`、`-beta`、`canary` など)を選ばない。依存を入れる前に、ハーネスの `.npmrc`(Takumi Guard)と `pnpm-workspace.yaml`(`trustPolicy: no-downgrade`)を置く(`references/security.md` の「依存の供給網」)。
 4. **性能**(`references/performance-ladder.md`)。性能の要件があるときだけ、必要な段階を決める。段階 4(WebAssembly)と 5(Go)は、ユーザーに確認してから採る。
-5. **デザインシステム**(`references/design-system.md`)。画面があるときだけ、8341-ui を使わない / 使う / 作る、から選ぶ。作る場合は、新しいリポジトリを作る前にユーザーの承認を得る。使う・作る場合は、部品を取り込み、DESIGN.md を置く。
+5. **デザインシステム**(`references/design-system.md`)。画面があるときだけ、8341-ui を使わない / 使う / 作って共有する / カスタマイズしてプロダクトに組み込む、から選ぶ。見た目を変えたいとき、複数のプロダクトで共有するなら作って共有する(新しいリポジトリを作る前にユーザーの承認を得る)、そのプロダクトだけなら組み込む(リポジトリもワークスペースも作らず、部品は `src/components/ui/`、トークンは `src/styles/foundation/` に置く。写す範囲を示して確認を得る)。使う・作る・組み込む場合は、DESIGN.md を置く。
 6. **構造と CQS**(`references/principles.md`、`references/cqs.md`)。採った段階のディレクトリを作り、モジュール(S では feature)の一覧と所有するテーブルを決める。画面があれば、`ui/` は `references/component-structure.md` に従う。
 7. **ハーネス**(`references/quality-gates.md`、`references/testing-strategy.md`、`references/editing-constraints.md`)。`templates/harness/README.md` の手順で雛形を置く。コマンドはすべて `Makefile` のターゲットにし、人もエージェントも CI も `make` で叩く(`references/coding-conventions.md` の「コマンドは make で叩く」)。
 8. **ADR と ARCHITECTURE.md**。ADR は最低限、次の 2 本を書く。段階 3 以上の性能対策、Go の採用、デザインシステムの選択(画面があるとき)、既定のスタックからの逸脱は、それぞれ別の ADR にする。

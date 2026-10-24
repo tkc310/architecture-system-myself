@@ -73,9 +73,45 @@ module.exports = {
     {
       name: "shared-ui-scope",
       severity: "error",
-      comment: "shared/ui/ は共通の部品だけ。shared/ui/ と shared/lib/ 以外を import しない。",
+      comment: "shared/ui/ は共通の部品だけ。shared/ui/ と shared/lib/(デザインシステムの D のときは src/components/ui/ と src/styles/foundation/ も)以外を import しない。",
       from: { path: "^src/shared/ui/" },
-      to: { path: "^src/", pathNot: "^src/shared/(ui|lib)/" },
+      to: { path: "^src/", pathNot: ["^src/shared/(ui|lib)/", "^src/components/ui/", "^src/styles/foundation/"] },
+    },
+    // ---- デザインシステムの D(8341-ui をカスタマイズしてプロダクトに組み込む)を選んだとき。B / C / A では該当するファイルがないので効かない ----
+    {
+      name: "ds-foundation-is-leaf",
+      severity: "error",
+      comment: "src/styles/foundation/(トークンの生成物、tv、focus)は src/ のほかの場所を import しない。",
+      from: { path: "^src/styles/foundation/" },
+      to: { path: "^src/", pathNot: "^src/styles/foundation/" },
+    },
+    {
+      name: "ds-components-scope",
+      severity: "error",
+      comment: "デザインシステムの部品(src/components/ui/)が使えるのは、ほかの部品と src/styles/foundation/ だけ。テストとストーリーは src/test/ も使える。",
+      from: { path: "^src/components/ui/", pathNot: "\\.(stories|test)\\.tsx?$" },
+      to: { path: "^(src|app)/", pathNot: ["^src/components/ui/", "^src/styles/foundation/"] },
+    },
+    {
+      name: "ds-components-via-index",
+      severity: "error",
+      comment: "部品同士とアプリから部品へは、各ディレクトリの index.tsx を通す。子の部品とフックは親の中だけで使う。",
+      from: { path: "^src/components/ui/([^/]+)/" },
+      to: { path: "^src/components/ui/[^/]+/(?!index\\.tsx$)", pathNot: "^src/components/ui/$1/" },
+    },
+    {
+      name: "ds-app-via-index",
+      severity: "error",
+      comment: "アプリは部品を index.tsx から使う。",
+      from: { pathNot: ["^src/components/ui/", "^\\.storybook/"] },
+      to: { path: "^src/components/ui/[^/]+/(?!index\\.tsx$)" },
+    },
+    {
+      name: "ds-base-ui-only-in-components",
+      severity: "error",
+      comment: "Base UI はデザインシステムの部品の中だけで使い、画面から直接使わない(D のとき)。",
+      from: { path: "^(src|app)/", pathNot: "^src/components/ui/" },
+      to: { path: "node_modules/@base-ui/react" },
     },
     {
       name: "shared-is-leaf",

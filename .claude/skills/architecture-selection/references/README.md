@@ -35,7 +35,7 @@
 - [構造の段階の選び方](./scale-selection.md): S / M / L の判定、段階による違い、昇格と降格の目安。
 - [技術選定](./tech-selection.md): 既定のスタック、システムの性質ごとの判断表、TypeScript の中で性能を上げる段階、Go と Flutter を選ぶ条件、エラー処理の方針、Go のサービスへ切り出せる状態の保ち方。
 - [性能対策の段階](./performance-ladder.md): Effect、Worker、WebAssembly、Go の順に進む手順と構成。
-- [デザインシステムの選択](./design-system.md): 8341-ui を使わない、使う、8341-ui をひな形に作る、の選び方と取り込み方。
+- [デザインシステムの選択](./design-system.md): 8341-ui を使わない、使う、ひな形に作って共有する、カスタマイズしてプロダクトに組み込む、の選び方と取り込み方。
 - [AI 駆動開発のための構造](./principles.md): 段階別のディレクトリ構成、公開 API、依存の向き、ファイルと関数の大きさ、命名、README と AGENTS.md。
 - [コンポーネントの構造](./component-structure.md): 画面のコンポーネントの置き場所、PascalCase のディレクトリと `index.tsx`、親子の入れ子、import の書き方。
 - [ユースケース層の CQS](./cqs.md): 段階別のコマンドとクエリ、service、ポート、リードモデル、モジュール間イベント。

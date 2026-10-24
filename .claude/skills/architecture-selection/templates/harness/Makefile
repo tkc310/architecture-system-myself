@@ -119,3 +119,20 @@ ui-update: ## 取り込んだ部品を取り込み直す(make ui-update name="@8
 	@test -f components.json || { echo 'components.json がない(ARCHITECTURE.md の「技術スタック」のデザインシステムの行)' >&2; exit 2; }
 	$(call require,name,$(UI_RE),make ui-update name=@8341/button)
 	@set -f; pnpm exec shadcn add --overwrite $$name
+
+# ---- デザインシステムの D を選んだときだけ(references/design-system.md の「ハーネスに足すもの」)。使わないなら消す ----
+# 生成物(src/styles/foundation/ の tokens.css など)はコミットする。ds-check を check の中で呼ぶ(package.json の check に足す)
+.PHONY: ds-generate ds-check
+ds-generate: ## トークン、tw-merge の設定、DESIGN.md の自動の範囲を生成し直す
+	node scripts/design/build-tokens.ts
+	node scripts/design/generate-tw-merge.ts
+	node scripts/design/sync-design-md.ts
+	node scripts/design/sync-product-design.ts
+ds-check: ## 生成物の鮮度、コントラスト、部品の構造、クラスの監査
+	node scripts/design/build-tokens.ts --check
+	node scripts/design/check-contrast.ts
+	node scripts/design/generate-tw-merge.ts --check
+	node scripts/design/sync-design-md.ts --check
+	node scripts/design/sync-product-design.ts --check
+	node scripts/design/check-structure.ts
+	node scripts/design/audit-classes.ts
